@@ -18,7 +18,7 @@
   --bg:#EDF1F3;--card:#FFFFFF;--soft:#F3F6F8;--ink:#13232E;--ink2:#465763;--ink3:#66757F;--line:#DCE3E8;
   --accent:#0B6B7A;--accent-ink:#FFFFFF;--accent-soft:#DCEEF0;
   --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s1-soft:#DDE9F9;--s2-soft:#FCE6DC;
-  --good:#0b7a0b;--crit:#c23030;--warn-bg:#FFF3D6;--warn-ink:#6B4A00;--dog:#9A5B2E;--dog-ink:#FFFFFF;--dog-soft:#F6E7D8;
+  --good:#0b7a0b;--crit:#c23030;--warn-bg:#FFF3D6;--warn-ink:#6B4A00;--dog:#9A5B2E;--dog-ink:#FFFFFF;--dog-soft:#F6E7D8;--gu:#7A3FD1;
   --round:ui-rounded,"SF Pro Rounded","Nunito","Varela Round",system-ui,-apple-system,"Segoe UI",sans-serif;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
   color-scheme:light;
@@ -28,14 +28,14 @@
     --bg:#0E161B;--card:#17222A;--soft:#1D2A33;--ink:#E9EFF2;--ink2:#B3C0C8;--ink3:#8A99A3;--line:#283842;
     --accent:#56BECB;--accent-ink:#06262B;--accent-soft:#173940;
     --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s1-soft:#1B3350;--s2-soft:#4A2A1B;
-    --good:#3fc23f;--crit:#ef7070;--warn-bg:#3D3110;--warn-ink:#F4D68A;--dog:#E3AD7F;--dog-ink:#2A1A0C;--dog-soft:#3F2D1D;color-scheme:dark;
+    --good:#3fc23f;--crit:#ef7070;--warn-bg:#3D3110;--warn-ink:#F4D68A;--dog:#E3AD7F;--dog-ink:#2A1A0C;--dog-soft:#3F2D1D;--gu:#B48CFF;color-scheme:dark;
   }
 }
 :root[data-tema="oscuro"]{
   --bg:#0E161B;--card:#17222A;--soft:#1D2A33;--ink:#E9EFF2;--ink2:#B3C0C8;--ink3:#8A99A3;--line:#283842;
   --accent:#56BECB;--accent-ink:#06262B;--accent-soft:#173940;
   --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s1-soft:#1B3350;--s2-soft:#4A2A1B;
-  --good:#3fc23f;--crit:#ef7070;--warn-bg:#3D3110;--warn-ink:#F4D68A;--dog:#E3AD7F;--dog-ink:#2A1A0C;--dog-soft:#3F2D1D;color-scheme:dark;
+  --good:#3fc23f;--crit:#ef7070;--warn-bg:#3D3110;--warn-ink:#F4D68A;--dog:#E3AD7F;--dog-ink:#2A1A0C;--dog-soft:#3F2D1D;--gu:#B48CFF;color-scheme:dark;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -135,6 +135,21 @@ button.row{width:100%;text-align:left}
 .chip.a{background:var(--s1-soft);box-shadow:inset 3px 0 0 var(--s1)}
 .chip.b{background:var(--s2-soft);box-shadow:inset 3px 0 0 var(--s2)}
 .chip.lib{opacity:.6}
+/* guardias */
+.chip.gu{font-weight:800}
+.chip.a.gu{box-shadow:inset 3px 0 0 var(--s1),inset 0 0 0 2px var(--gu)}
+.chip.b.gu{box-shadow:inset 3px 0 0 var(--s2),inset 0 0 0 2px var(--gu)}
+.gud{width:8px;height:8px;border-radius:50%;background:var(--gu);flex:none}
+.sem .p.gu{font-weight:800;color:var(--gu)}
+.sem .p.a.gu{box-shadow:inset 0 3px 0 var(--s1),inset 0 0 0 2px var(--gu)}
+.sem .p.b.gu{box-shadow:inset 0 3px 0 var(--s2),inset 0 0 0 2px var(--gu)}
+/* semana deslizable en Inicio */
+.semw{touch-action:pan-y}
+.puntos{display:flex;justify-content:center;gap:6px;margin-top:10px}
+.puntos i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.puntos i.on{background:var(--ink2)}
+@media (prefers-reduced-motion:no-preference){.semw.entra{animation:semEntra .22s ease-out}}
+@keyframes semEntra{from{transform:translateX(var(--dx,0));opacity:.35}to{transform:none;opacity:1}}
 .chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip em{font-style:normal;font-weight:500;color:var(--ink2);font-size:12.5px;flex:none}
 .carril{display:flex;flex-wrap:wrap;gap:6px}
@@ -264,11 +279,11 @@ function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';cl
 /* ================= datos ================= */
 const KEY='panelAlex.v1',LIB0='L, libre, descanso, vacaciones, festivo, asuntos propios';let soloMem=false;
 function seed(){return {v:1,
-  cfg:{nombre:'Álex',pareja:'Pareja',split:50,metaSes:4,libres:LIB0,icsYo:'',icsPareja:'',pin:null,priv:false,tema:'auto',objInv:0,aportMes:0,rent:7},
-  eco:{years:{},fijos:[]},inv:{pos:[],mov:[],hist:[]},act:{ses:[]},cal:{ev:[],sync:{}},obj:{items:[],reg:{}}}}
+  cfg:{nombre:'Álex',pareja:'Pareja',split:50,metaSes:4,libres:LIB0,ocultar:'Servicio 08:00-09:00',icsYo:'',icsPareja:'',pin:null,priv:false,tema:'auto',objInv:0,aportMes:0,rent:7},
+  eco:{years:{},fijos:[]},inv:{pos:[],mov:[],hist:[]},act:{ses:[]},cal:{ev:[],sync:{},oc:{}},obj:{items:[],reg:{}}}}
 function cargar(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.v===1)return s}}catch(e){soloMem=true}return seed()}
 let S=cargar();
-function migra(){if(S.cfg.libres==='libre, descanso, vacaciones')S.cfg.libres=LIB0}
+function migra(){if(S.cfg.libres==='libre, descanso, vacaciones')S.cfg.libres=LIB0;if(S.cfg.ocultar==null)S.cfg.ocultar='Servicio 08:00-09:00';if(!S.cal.oc)S.cal.oc={}}
 migra();
 const tmpY={};
 function guardar(sil){for(const y in tmpY){if(JSON.stringify(tmpY[y].Y)!==tmpY[y].j){S.eco.years[y]=tmpY[y].Y;delete tmpY[y]}}
@@ -291,7 +306,7 @@ let cs=lee(K,null),meta=lee(MK,{}),nom=lee(NK,null);
 const st={busy:false,again:false,err:null,code:null,last:+lee(K+'-last',0)||null};
 let tmr=null,ver=0,inited=false;const kc={};
 const on=()=>!!(cs&&cs.user&&cs.repo&&cs.token&&cs.pass);
-const fp=k=>k==='inv'?JSON.stringify([S.inv.pos,S.inv.mov]):k==='cal'?JSON.stringify([S.cal.ev,S.cal.perro||{}]):JSON.stringify(S[k]);
+const fp=k=>k==='inv'?JSON.stringify([S.inv.pos,S.inv.mov]):k==='cal'?JSON.stringify([S.cal.ev,S.cal.perro||{},S.cal.oc||{}]):JSON.stringify(S[k]);
 const fps={};const refps=()=>SECS.forEach(k=>fps[k]=fp(k));refps();
 function nota(sil){let ch=false;SECS.forEach(k=>{const j=fp(k);if(fps[k]!==j){fps[k]=j;if(!sil){meta[k]=Date.now();ch=true}}});if(ch){ver++;pon(MK,meta);soon()}}
 function soon(){if(!on())return;clearTimeout(tmr);tmr=setTimeout(()=>now(false),1500)}
@@ -473,9 +488,15 @@ function importaApple(txt){const AP=S.act.ap=S.act.ap||{};let n=0;String(txt).sp
 /* ================= agenda: cálculos ================= */
 const libresRe=()=>{const k=(S.cfg.libres||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);return k.length?{test:t=>{t=String(t).trim().toLowerCase();return k.some(x=>x.length<=2?t===x:t.includes(x))}}:null};
 const esPerro=k=>!!(S.cal.perro&&S.cal.perro[k]);
-function evDia(d,q){const k=ymd(d);return S.cal.ev.filter(e=>e.quien===q&&e.d1<=k&&e.d2>=k).sort((a,b)=>(a.h1||'')<(b.h1||'')?-1:1)}
+const nTit=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[\u2010-\u2015\u2212]/g,'-').replace(/\s+/g,'');
+const ocKey=e=>e.d1+'|'+(e.h1||'')+'|'+nTit(e.titulo);
+let ocC={src:null,L:[]};
+function evVis(e){if(e.origen!=='ics')return true;if(S.cal.oc&&S.cal.oc[ocKey(e)])return false;
+  if(ocC.src!==S.cfg.ocultar)ocC={src:S.cfg.ocultar,L:String(S.cfg.ocultar||'').split(/[,\n]/).map(nTit).filter(Boolean)};return !ocC.L.includes(nTit(e.titulo))}
+const esGu=t=>/guardia/i.test(String(t||''));
+function evDia(d,q){const k=ymd(d);return S.cal.ev.filter(e=>e.quien===q&&e.d1<=k&&e.d2>=k&&evVis(e)).sort((a,b)=>(a.h1||'')<(b.h1||'')?-1:1)}
 function evHora(e,k){if(!e.h1)return '';if(e.d1===e.d2)return e.h1+(e.h2&&e.h2!==e.h1?'–'+e.h2:'');if(k===e.d1)return 'desde '+e.h1;if(k===e.d2)return 'hasta '+e.h2;return 'todo el día'}
-const hayDos=()=>S.cal.ev.some(e=>e.quien==='yo')&&S.cal.ev.some(e=>e.quien==='pareja');
+const hayDos=()=>S.cal.ev.some(e=>e.quien==='yo'&&evVis(e))&&S.cal.ev.some(e=>e.quien==='pareja'&&evVis(e));
 function ambosSin(d){if(!hayDos())return false;const re=libresRe(),oc=q=>evDia(d,q).some(e=>!(re&&re.test(e.titulo)));return !oc('yo')&&!oc('pareja')}
 /* lector de calendarios .ics */
 function icsF(v){v=v.trim();let m=v.match(/^(\d{4})(\d{2})(\d{2})$/);if(m)return {t:new Date(+m[1],+m[2]-1,+m[3]),dia:true};
@@ -510,6 +531,7 @@ function parseICS(txt,desde,hasta){const L=txt.replace(/\r\n?/g,'\n').replace(/\
   return out}
 function cargarICS(txt,q,sil){if(!/BEGIN:VCALENDAR/.test(txt))throw new Error('El archivo no es un calendario');
   const ev=parseICS(txt,addD(hoy(),-60),addD(hoy(),400));S.cal.ev=S.cal.ev.filter(e=>!(e.quien===q&&e.origen==='ics')).concat(ev.map(e=>Object.assign(e,{id:uid(),quien:q,origen:'ics'})));
+  const OC=S.cal.oc=S.cal.oc||{},lim=ymd(addD(hoy(),-90));Object.keys(OC).forEach(x=>{if(String(OC[x])<lim)delete OC[x]});
   S.cal.sync[q]=Date.now();guardar(sil);return ev.length}
 async function bajarICS(q,silencio){const url=((q==='yo'?S.cfg.icsYo:S.cfg.icsPareja)||'').trim().replace(/^webcal:/i,'https:');if(!url)return;let txt=null;
   try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw 0;txt=await r.text();if(!/BEGIN:VCALENDAR/.test(txt))throw 0}catch(e){txt=null}
@@ -574,13 +596,8 @@ V.inicio=()=>{const d=new Date(),h=hoy(),k=ymd(h),Y=ecoY(String(d.getFullYear())
   avisosFijos().forEach(a=>s+='<div class="aviso"><span>'+esc(a.f.nombre)+' ('+M(a.f.importe)+') se cobra '+(a.dif?'el mes que viene':'este mes')+'.</span></div>');
   s+='</div></section>';
   // semana
-  const l=lunes(h);s+='<section><div class="sh"><h2>Esta semana</h2><a href="#" data-a="tab" data-t="agenda">Agenda</a></div><div class="card"><div class="sem">';
-  const re=libresRe();
-  for(let i=0;i<7;i++){const dd=addD(l,i),a=evDia(dd,'yo'),b=evDia(dd,'pareja'),pill=(ev,c)=>{if(!ev.length)return '<div class="p x"></div>';const e=ev.find(x=>!(re&&re.test(x.titulo)))||ev[0];return '<div class="p '+c+(re&&re.test(e.titulo)?' lib':'')+'" title="'+esc(e.titulo)+'">'+esc(e.titulo.trim().split(/\s+/)[0].slice(0,5))+(ev.length>1?'+':'')+'</div>'};
-    const pr=esPerro(ymd(dd));s+='<button class="d'+(+dd===+h?' hoy':'')+(ambosSin(dd)?' com':'')+(pr?' perro':'')+'" data-a="tab" data-t="agenda" aria-label="'+DIA[i]+' '+dd.getDate()+(pr?', día complicado para el perro':'')+'"><span class="w">'+DIAC[i][0]+'</span><span class="n">'+dd.getDate()+'</span><span class="pp">'+(pr?pata:'')+'</span>'+pill(a,'a')+pill(b,'b')+'</button>'}
-  s+='</div><div class="ley"><span><i style="background:var(--s1)"></i>'+esc(S.cfg.nombre)+'</span><span><i style="background:var(--s2)"></i>'+esc(S.cfg.pareja)+'</span>'+(hayDos()?'<span><i style="background:var(--s3);border-radius:50%"></i>Los dos sin eventos</span>':'')+'<span style="display:inline-flex;align-items:center;gap:4px;color:var(--dog)">'+pata.replace('class="pata"','class="pata" style="width:14px;height:14px"')+'<span style="color:var(--ink2)">Perro</span></span></div>';
-  if(!S.cal.ev.length)s+='<div class="muted small" style="margin-top:8px">Todavía no hay calendarios. Añádelos en Agenda.</div>';
-  s+='</div></section>';
+  s+='<section id="semS">'+semSec(U.semI||0)+'</section>';
+  const l=lunes(h);
   // resumen
   const me=medias(Y),mm=miMes(Y,m),it=invTot(),cd=cambioDia(),ss=sesSem(l),mins=ss.reduce((a,x)=>a+(x.min||0),0),rc=racha();
   const ms=S.obj.items.filter(o=>o.ambito!=='dia'&&o.tipo==='num'&&o.meta>0),prog=ms.length?ms.reduce((a,o)=>a+Math.min(1,objVal(o,perKey(o.ambito))/o.meta),0)/ms.length:null;
@@ -591,20 +608,33 @@ V.inicio=()=>{const d=new Date(),h=hoy(),k=ymd(h),Y=ecoY(String(d.getFullYear())
   s+='<button class="tile" data-a="tab" data-t="act"><span class="l">'+ic('act')+'Entrenos esta semana</span><span class="val">'+ss.length+' de '+S.cfg.metaSes+'</span>'+meter(ss.length/S.cfg.metaSes)+'<span class="s">'+mins+' min'+(rc?' · racha de '+rc+' sem':'')+'</span></button>';
   s+='<button class="tile" data-a="tab" data-t="obj"><span class="l">'+ic('obj')+'Propósitos</span><span class="val">'+(dia.length?hechos+' de '+dia.length+' hoy':'—')+'</span>'+(prog!=null?meter(prog):'')+'<span class="s">'+(prog!=null?'Mes y año al '+pct(prog):'Añade los tuyos')+'</span></button>';
   return s+'</div></section>'};
+function semSec(w){const h=hoy(),l=addD(lunes(h),7*w),re=libresRe();let gu=false;
+  let s='<div class="sh"><h2>'+(w?'Semana que viene':'Esta semana')+'</h2><span style="display:flex;align-items:center;gap:2px"><button class="ib" data-a="semI" data-n="0" aria-label="Esta semana"'+(w?'':' disabled style="opacity:.3"')+'>'+ic('left')+'</button><button class="ib" data-a="semI" data-n="1" aria-label="Semana que viene"'+(w?' disabled style="opacity:.3"':'')+'>'+ic('right')+'</button><a href="#" data-a="tab" data-t="agenda" data-w="'+w+'" style="margin-left:6px">Agenda</a></span></div><div class="card"><div class="sem semw">';
+  for(let i=0;i<7;i++){const dd=addD(l,i),a=evDia(dd,'yo'),b=evDia(dd,'pareja'),pill=(ev,c)=>{if(!ev.length)return '<div class="p x"></div>';const e=ev.find(x=>esGu(x.titulo))||ev.find(x=>!(re&&re.test(x.titulo)))||ev[0],g=esGu(e.titulo);if(g)gu=true;return '<div class="p '+c+(g?' gu':re&&re.test(e.titulo)?' lib':'')+'" title="'+esc(e.titulo)+'">'+esc(g?'Guar':e.titulo.trim().split(/\s+/)[0].slice(0,5))+(ev.length>1?'+':'')+'</div>'};
+    const pr=esPerro(ymd(dd));s+='<button class="d'+(+dd===+h?' hoy':'')+(ambosSin(dd)?' com':'')+(pr?' perro':'')+'" data-a="tab" data-t="agenda" data-w="'+w+'" aria-label="'+DIA[i]+' '+dd.getDate()+(pr?', día complicado para el perro':'')+'"><span class="w">'+DIAC[i][0]+'</span><span class="n">'+dd.getDate()+'</span><span class="pp">'+(pr?pata:'')+'</span>'+pill(a,'a')+pill(b,'b')+'</button>'}
+  s+='</div><div class="ley"><span><i style="background:var(--s1)"></i>'+esc(S.cfg.nombre)+'</span><span><i style="background:var(--s2)"></i>'+esc(S.cfg.pareja)+'</span>'+(gu?'<span><i style="background:var(--gu);border-radius:50%"></i>Guardia</span>':'')+(hayDos()?'<span><i style="background:var(--s3);border-radius:50%"></i>Los dos sin eventos</span>':'')+'<span style="display:inline-flex;align-items:center;gap:4px;color:var(--dog)">'+pata.replace('class="pata"','class="pata" style="width:14px;height:14px"')+'<span style="color:var(--ink2)">Perro</span></span></div>';
+  if(!S.cal.ev.length)s+='<div class="muted small" style="margin-top:8px">Todavía no hay calendarios. Añádelos en Agenda.</div>';
+  return s+'<div class="puntos" aria-hidden="true"><i'+(w?'':' class="on"')+'></i><i'+(w?' class="on"':'')+'></i></div></div>'}
+function pintaSem(dir){const c=$('#semS');if(!c)return;c.innerHTML=semSec(U.semI||0);const w=c.querySelector('.semw');if(w&&dir){w.style.setProperty('--dx',(dir>0?40:-40)+'px');w.classList.add('entra')}}
+let semT=null;
+document.addEventListener('touchstart',e=>{semT=e.target.closest('.semw')&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});
+document.addEventListener('touchend',e=>{if(!semT)return;const t=e.changedTouches[0],dx=t.clientX-semT.x,dy=t.clientY-semT.y;semT=null;
+  if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5){U.swipe=Date.now();const n=dx<0?1:0;if(n!==(U.semI||0)){U.semI=n;pintaSem(dx<0?1:-1)}}},{passive:true});
 function ckObj(o,k){const v=objVal(o,k),on=v>=(o.tipo==='num'?o.meta||1:1);return '<button class="ck" data-a="objTic" data-id="'+o.id+'" aria-pressed="'+on+'"><span class="box">'+ic('check')+'</span><span class="t">'+esc(o.nombre)+'</span></button>'}
 
 V.agenda=()=>{const l=U.sem,f=addD(l,6),h=hoy(),re=libresRe();
   let s=cab('Agenda',l.getDate()+(l.getMonth()!==f.getMonth()?' '+MESC[l.getMonth()].toLowerCase():'')+'–'+f.getDate()+' '+MESC[f.getMonth()].toLowerCase()+' '+f.getFullYear(),'<button class="ib" data-a="sem" data-n="-1" aria-label="Semana anterior">'+ic('left')+'</button><button class="ib" data-a="sem" data-n="1" aria-label="Semana siguiente">'+ic('right')+'</button><button class="ib pri" data-a="evNuevo" aria-label="Añadir evento">'+ic('plus')+'</button>');
   s+='<div class="cols"><section><div class="card">';
   for(let i=0;i<7;i++){const d=addD(l,i),k=ymd(d),a=evDia(d,'yo'),b=evDia(d,'pareja');
-    const chips=(ev,c)=>ev.map(e=>'<button class="chip '+c+(re&&re.test(e.titulo)?' lib':'')+'" data-a="evEdit" data-id="'+e.id+'"><span>'+esc(e.titulo)+'</span><em>'+evHora(e,k)+'</em></button>').join('');
+    const chips=(ev,c)=>ev.map(e=>{const g=esGu(e.titulo);return '<button class="chip '+c+(g?' gu':re&&re.test(e.titulo)?' lib':'')+'" data-a="evEdit" data-id="'+e.id+'">'+(g?'<i class="gud" aria-hidden="true"></i>':'')+'<span>'+esc(e.titulo)+'</span><em>'+evHora(e,k)+'</em></button>'}).join('');
     const pr=esPerro(k);s+='<div class="dia'+(+d===+h?' hoy':'')+(pr?' perro':'')+'"><div class="f"><b>'+DIAC[i]+'</b><span>'+d.getDate()+'</span></div><div class="c">'+(a.length?'<div class="carril">'+chips(a,'a')+'</div>':'')+(b.length?'<div class="carril">'+chips(b,'b')+'</div>':'')+(!a.length&&!b.length?'<span class="muted small">'+(ambosSin(d)?'Los dos sin eventos':'Sin eventos')+'</span>':ambosSin(d)?'<span class="tag ok">Los dos sin eventos de trabajo</span>':'')+(pr?'<span class="small" style="font-weight:650;color:var(--dog)">Día complicado para el perro</span>':'')+'</div><button class="bp" data-a="perro" data-k="'+k+'" aria-pressed="'+pr+'" aria-label="Marcar '+DIA[i].toLowerCase()+' '+d.getDate()+' como día complicado para el perro">'+pata+'</button></div>'}
   s+='</div><div class="ley"><span><i style="background:var(--s1)"></i>'+esc(S.cfg.nombre)+'</span><span><i style="background:var(--s2)"></i>'+esc(S.cfg.pareja)+'</span>'+(+l!==+lunes(h)?'<button class="link" data-a="sem" data-n="0">Volver a hoy</button>':'')+'</div></section>';
   s+='<section><div class="sh"><h2>Calendarios enlazados</h2></div><div class="card">';
   [['yo',S.cfg.nombre,'icsYo'],['pareja',S.cfg.pareja,'icsPareja']].forEach(([q,n,key])=>{const t=S.cal.sync[q],num=S.cal.ev.filter(e=>e.quien===q&&e.origen==='ics').length;
     s+='<div style="'+(q==='pareja'?'border-top:1px solid var(--line);margin-top:14px;padding-top:14px':'')+'"><div class="kv"><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--'+(q==='yo'?'s1':'s2')+');margin-right:6px"></i><b style="font-family:var(--sans)">'+esc(n)+'</b></span><span class="muted small">'+(t?num+' eventos · '+new Date(t).toLocaleDateString('es-ES',{day:'numeric',month:'short'}):'Sin cargar')+'</span></div>'+
       '<label class="f" style="margin-top:4px"><span>Enlace del calendario (Lyados)</span><input type="url" inputmode="url" placeholder="webcal://… o https://…" value="'+esc(S.cfg[key])+'" data-cfg="'+key+'"></label><div class="btns"><button class="btn s" data-a="icsUrl" data-q="'+q+'">Actualizar desde el enlace</button><button class="btn s" data-a="icsFile" data-q="'+q+'">Importar archivo .ics</button></div></div>'});
-  s+='<p class="muted small" style="margin:14px 0 0">La huella de cada día marca los días complicados para organizar al perro. Las palabras que cuentan como día libre se cambian en Ajustes.</p></div></section></div>';return s};
+  {const no=Object.keys(S.cal.oc||{}).length;if(no)s+='<div class="kv" style="margin-top:14px"><span class="muted small">'+no+(no>1?' eventos ocultados':' evento ocultado')+' a mano</span><button class="link" data-a="evOcReset">Volver a mostrarlos</button></div>'}
+  s+='<p class="muted small" style="margin:14px 0 0">Toca un evento para ocultarlo. Los títulos que se ocultan solos se cambian en Ajustes. La huella de cada día marca los días complicados para organizar al perro. Las palabras de día libre también están en Ajustes.</p></div></section></div>';return s};
 
 V.eco=()=>{const Y=ecoY(U.ecoY),m=U.ecoM,ys=[...new Set(Object.keys(S.eco.years).concat(U.ecoY))].sort(),nx=String(+ys[ys.length-1]+1);
   let s=cab('Economía','Gastos comunes y personales','<select class="btn s" data-sel="ecoY" aria-label="Año">'+ys.map(y=>'<option'+(y===U.ecoY?' selected':'')+'>'+y+'</option>').join('')+'<option value="'+nx+'">Abrir '+nx+'</option></select>');
@@ -745,12 +775,18 @@ function exportar(){const txt=JSON.stringify(S),nombre='panel-alex-'+ymd(new Dat
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=nombre;document.body.appendChild(a);a.click();a.remove()}
 const h32=s=>{let h=2166136261;for(let k=0;k<2000;k++){for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}h^=k}return (h>>>0).toString(16)};
 const A={
-  tab:e=>{U.tab=e.dataset.t;if(U.tab==='agenda')U.sem=lunes(hoy());render();window.scrollTo(0,0)},
+  tab:e=>{if(U.swipe&&Date.now()-U.swipe<600&&e.closest('.semw'))return;U.tab=e.dataset.t;if(U.tab==='agenda')U.sem=addD(lunes(hoy()),7*(+e.dataset.w||0));if(U.tab==='inicio')U.semI=0;render();window.scrollTo(0,0)},
+  semI:e=>{const n=+e.dataset.n;if(n===(U.semI||0))return;U.semI=n;pintaSem(n?1:-1)},
   priv:()=>{S.cfg.priv=!S.cfg.priv;guardar();render()},
   cerrarHoja,borrarHoja:e=>{if(e.dataset.ok){hoja.borrar();cerrarHoja();cambio()}else{e.dataset.ok=1;e.textContent='Pulsa otra vez para borrar'}},
   sem:e=>{const n=+e.dataset.n;U.sem=n?addD(U.sem,7*n):lunes(hoy());render()},
   perro:e=>{const k=e.dataset.k,P=S.cal.perro=S.cal.perro||{};if(P[k])delete P[k];else P[k]=1;const lim=ymd(addD(hoy(),-90));Object.keys(P).forEach(x=>{if(x<lim)delete P[x]});cambio()},
-  evNuevo:()=>hojaEv(),evEdit:e=>{const x=buscar(S.cal.ev,e.dataset.id);if(!x)return;if(x.origen==='ics')toast('Viene del calendario enlazado; se cambia en Lyados.');else hojaEv(x)},
+  evNuevo:()=>hojaEv(),evEdit:e=>{const x=buscar(S.cal.ev,e.dataset.id);if(!x)return;if(x.origen!=='ics'){hojaEv(x);return}U.evSel=x;const d=pYmd(x.d1);
+    sheet({titulo:x.titulo,intro:DIA[(d.getDay()+6)%7]+' '+d.getDate()+' de '+MES[d.getMonth()].toLowerCase()+(x.h1?', '+evHora(x,x.d1):'')+'. Viene del calendario de Lyados: para cambiarlo, hazlo allí. Aquí puedes ocultarlo.',
+      extra:'<div class="btns" style="flex-direction:column;align-items:stretch"><button type="button" class="btn pel" data-a="evOc">Ocultar este evento</button><button type="button" class="btn s" data-a="evOcT">Ocultar siempre los que se llamen «'+esc(x.titulo)+'»</button></div>'})},
+  evOc:()=>{const x=U.evSel;if(!x)return;(S.cal.oc=S.cal.oc||{})[ocKey(x)]=x.d2;cerrarHoja();cambio();toast('Evento ocultado')},
+  evOcT:()=>{const x=U.evSel;if(!x)return;const L=String(S.cfg.ocultar||'').split(/[,\n]/).map(t=>t.trim()).filter(Boolean);if(!L.some(t=>nTit(t)===nTit(x.titulo)))L.push(x.titulo.replace(/,/g,' '));S.cfg.ocultar=L.join(', ');cerrarHoja();cambio();toast('Se ocultarán todos los «'+x.titulo+'»')},
+  evOcReset:()=>{S.cal.oc={};cambio();toast('Eventos ocultados visibles otra vez')},
   icsUrl:e=>{const q=e.dataset.q;if(!(q==='yo'?S.cfg.icsYo:S.cfg.icsPareja)){toast('Pega primero el enlace');return}toast('Leyendo calendario…');bajarICS(q)},
   icsFile:e=>elegirArchivo('.ics,text/calendar',t=>{try{toast(cargarICS(t,e.dataset.q)+' eventos cargados');render()}catch(er){toast(er.message)}}),
   ecoV:e=>{U.ecoV=e.dataset.v;render()},ecoM:e=>{U.ecoM=+e.dataset.m;render()},
@@ -772,7 +808,7 @@ const A={
   objTic:e=>{const o=buscar(S.obj.items,e.dataset.id),k=o.id+'|'+perKey(o.ambito);if(o.auto)return;const on=(S.obj.reg[k]||0)>=(o.tipo==='num'?o.meta||1:1);if(on)delete S.obj.reg[k];else S.obj.reg[k]=o.tipo==='num'?o.meta||1:1;cambio()},
   objPaso:e=>{const o=buscar(S.obj.items,e.dataset.id),k=o.id+'|'+perKey(o.ambito);S.obj.reg[k]=Math.max(0,(S.obj.reg[k]||0)+(+e.dataset.n));cambio()},
   objBorraEj:e=>{if(!e.dataset.ok){e.dataset.ok=1;e.textContent='Pulsa otra vez para quitarlos';return}S.obj.items=S.obj.items.filter(o=>!o.ej);cambio()},
-  ajustes:()=>sheet({titulo:'Ajustes',val:Object.assign({},S.cfg,{pin:''}),campos:[{k:'nombre',l:'Tu nombre'},{k:'pareja',l:'Nombre de tu pareja'},{k:'split',l:'Tu parte de los gastos comunes (%)',tipo:'num'},{k:'metaSes',l:'Entrenos por semana (meta)',tipo:'num'},{k:'libres',l:'Palabras que cuentan como día libre',ay:'Separadas por comas. Las de una o dos letras (como L) deben coincidir con el título entero; las demás basta con que aparezcan.'},{k:'tema',l:'Aspecto',tipo:'select',ops:[['auto','Como el dispositivo'],['claro','Claro'],['oscuro','Oscuro']]},{k:'pin',l:S.cfg.pin?'Cambiar PIN (vacío = mantener)':'PIN de entrada (opcional)',tipo:'password',ay:'Oculta la app al abrirla. No cifra los datos guardados.'}],
+  ajustes:()=>sheet({titulo:'Ajustes',val:Object.assign({},S.cfg,{pin:''}),campos:[{k:'nombre',l:'Tu nombre'},{k:'pareja',l:'Nombre de tu pareja'},{k:'split',l:'Tu parte de los gastos comunes (%)',tipo:'num'},{k:'metaSes',l:'Entrenos por semana (meta)',tipo:'num'},{k:'libres',l:'Palabras que cuentan como día libre',ay:'Separadas por comas. Las de una o dos letras (como L) deben coincidir con el título entero; las demás basta con que aparezcan.'},{k:'ocultar',l:'Eventos que se ocultan solos',ay:'Títulos exactos separados por comas. No importan mayúsculas, tildes ni espacios.'},{k:'tema',l:'Aspecto',tipo:'select',ops:[['auto','Como el dispositivo'],['claro','Claro'],['oscuro','Oscuro']]},{k:'pin',l:S.cfg.pin?'Cambiar PIN (vacío = mantener)':'PIN de entrada (opcional)',tipo:'password',ay:'Oculta la app al abrirla. No cifra los datos guardados.'}],
     extra:'<div class="btns"><button type="button" class="btn s" data-a="exportar">Guardar copia</button><button type="button" class="btn s" data-a="importar">Restaurar copia</button>'+(S.cfg.pin?'<button type="button" class="btn s" data-a="quitarPin">Quitar PIN</button>':'')+'</div>'+SY.block()+SY.autoBlock(),
     guardar:v=>{const pin=v.pin;delete v.pin;v.split=v.split==null?50:Math.max(0,Math.min(100,v.split));v.metaSes=Math.max(1,Math.round(v.metaSes||4));v.nombre=v.nombre||'Álex';v.pareja=v.pareja||'Pareja';Object.assign(S.cfg,v);if(pin)S.cfg.pin=h32(pin)}}),
   syncSetup:()=>{const c=SY.cfg()||{},at='autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off"';
