@@ -206,6 +206,13 @@ td.pen{color:var(--ink3)}
 .barra:first-child{border-top:0}
 .barra .tr{grid-column:1/3;height:8px;border-radius:99px;background:var(--s1-soft)}
 .barra .tr i{display:block;height:100%;border-radius:99px;background:var(--s1)}
+.barra .t small{display:block;font-size:12.5px;color:var(--ink3);font-weight:500}
+#toast button{margin-left:12px;color:inherit;font-weight:800;text-decoration:underline;min-height:0}
+.row.meta{flex-wrap:wrap;width:100%;text-align:left}
+.row.meta .mt{flex-basis:100%;margin-top:-4px}
+.frase{margin:0;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.frase:first-of-type{border-top:0}
+h3.sep{margin:18px 0 4px;padding-top:14px;border-top:1px solid var(--line)}
 /* hoja */
 #sheet{position:fixed;inset:0;z-index:40;display:none;background:rgba(8,16,22,.45);align-items:flex-end;justify-content:center}
 #sheet.on{display:flex}
@@ -274,7 +281,8 @@ const fFecha=s=>{const d=pYmd(s);return d.getDate()+' '+MESC[d.getMonth()].toLow
 const I={inicio:'<path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',agenda:'<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M8 3v4M16 3v4"/>',eco:'<circle cx="12" cy="12" r="8.5"/><path d="M15.2 9.2a3.6 3.6 0 1 0 0 5.6M7.6 11h5M7.6 13.2h5"/>',inv:'<path d="M4 18l5-6 4 3 7-9M15 6h5v5"/>',act:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.3"/>',obj:'<circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.8-5"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>',eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',eyeoff:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><path d="M4 4l16 16"/>',plus:'<path d="M12 5v14M5 12h14"/>',left:'<path d="M14.5 5l-7 7 7 7"/>',right:'<path d="M9.5 5l7 7-7 7"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>'};
 const pata='<svg class="pata" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12.4c-2.7 0-5.2 2.3-5.2 4.8 0 1.7 1.3 2.5 2.8 2.5.9 0 1.6-.4 2.4-.4s1.5.4 2.4.4c1.5 0 2.8-.8 2.8-2.5 0-2.5-2.5-4.8-5.2-4.8z"/><ellipse cx="5.9" cy="10.4" rx="1.8" ry="2.3"/><ellipse cx="9.6" cy="6.6" rx="1.8" ry="2.4"/><ellipse cx="14.4" cy="6.6" rx="1.8" ry="2.4"/><ellipse cx="18.1" cy="10.4" rx="1.8" ry="2.3"/></svg>';
 const ic=n=>'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+I[n]+'</svg>';
-function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
+function toast(t,ac){const e=$('#toast');e.textContent=t;if(ac){const b=document.createElement('button');b.type='button';b.textContent=ac.txt;b.onclick=()=>{e.style.display='none';ac.fn()};e.appendChild(b)}
+  e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',ac?9000:2600)}
 
 /* ================= datos ================= */
 const KEY='panelAlex.v1',LIB0='L, libre, descanso, vacaciones, festivo, asuntos propios';let soloMem=false;
@@ -283,7 +291,16 @@ function seed(){return {v:1,
   eco:{years:{},fijos:[]},inv:{pos:[],mov:[],hist:[]},act:{ses:[]},cal:{ev:[],sync:{},oc:{}},obj:{items:[],reg:{}}}}
 function cargar(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.v===1)return s}}catch(e){soloMem=true}return seed()}
 let S=cargar();
-function migra(){if(S.cfg.libres==='libre, descanso, vacaciones')S.cfg.libres=LIB0;if(S.cfg.ocultar==null)S.cfg.ocultar='Servicio 08:00-09:00';if(!S.cal.oc)S.cal.oc={}}
+const PROD=[['accion','Acción'],['etf','ETF'],['fondo','Fondo de inversión'],['rf','Fondo de renta fija'],['mon','Fondo monetario'],['ahorro','Cuenta de ahorro'],['deposito','Depósito a plazo'],['plan','Plan de pensiones'],['cripto','Criptomoneda'],['otro','Otro']];
+const prodN=t=>(PROD.find(x=>x[0]===t)||PROD[0])[1];
+const esSaldo=p=>p.tipo==='ahorro'||p.tipo==='deposito';
+function migra(){if(S.cfg.libres==='libre, descanso, vacaciones')S.cfg.libres=LIB0;if(S.cfg.ocultar==null)S.cfg.ocultar='Servicio 08:00-09:00';if(!S.cal.oc)S.cal.oc={};
+  const I=S.inv;if(!Array.isArray(I.cuentas))I.cuentas=['ING','IBKR'];if(!Array.isArray(I.ops))I.ops=[];
+  I.pos.forEach(p=>{if(!p.tipo)p.tipo='accion';if(p.cuenta&&!I.cuentas.includes(p.cuenta))I.cuentas.push(p.cuenta)});
+  if(!Array.isArray(S.act.metas))S.act.metas=[{id:'m0',tipo:'',n:Math.max(1,Math.round(S.cfg.metaSes||4)),uni:'ses',per:'sem'}];if(!Array.isArray(S.act.tipos))S.act.tipos=[];
+  Object.values(S.eco.years).forEach(Y=>Y.grupos.forEach(g=>{if(!g.off)g.off={};if(g.hasta)for(let m=g.hasta;m<12;m++)g.off[m]=1;delete g.hasta}))}
+let UN=null;
+function conDeshacer(fn,msg){const antes=JSON.stringify(S);fn();cambio();toast(msg||'Borrado.',{txt:'Deshacer',fn:()=>{S=JSON.parse(antes);for(const y in tmpY)delete tmpY[y];cambio();toast('Recuperado')}})}
 migra();
 const tmpY={};
 function guardar(sil){for(const y in tmpY){if(JSON.stringify(tmpY[y].Y)!==tmpY[y].j){S.eco.years[y]=tmpY[y].Y;delete tmpY[y]}}
@@ -306,7 +323,7 @@ let cs=lee(K,null),meta=lee(MK,{}),nom=lee(NK,null);
 const st={busy:false,again:false,err:null,code:null,last:+lee(K+'-last',0)||null};
 let tmr=null,ver=0,inited=false;const kc={};
 const on=()=>!!(cs&&cs.user&&cs.repo&&cs.token&&cs.pass);
-const fp=k=>k==='inv'?JSON.stringify([S.inv.pos,S.inv.mov]):k==='cal'?JSON.stringify([S.cal.ev,S.cal.perro||{},S.cal.oc||{}]):JSON.stringify(S[k]);
+const fp=k=>k==='inv'?JSON.stringify([S.inv.pos,S.inv.mov,S.inv.cuentas,S.inv.ops]):k==='cal'?JSON.stringify([S.cal.ev,S.cal.perro||{},S.cal.oc||{}]):JSON.stringify(S[k]);
 const fps={};const refps=()=>SECS.forEach(k=>fps[k]=fp(k));refps();
 function nota(sil){let ch=false;SECS.forEach(k=>{const j=fp(k);if(fps[k]!==j){fps[k]=j;if(!sil){meta[k]=Date.now();ch=true}}});if(ch){ver++;pon(MK,meta);soon()}}
 function soon(){if(!on())return;clearTimeout(tmr);tmr=setTimeout(()=>now(false),1500)}
@@ -442,10 +459,10 @@ return {nota,now,block,conecta,off,init,on,cfg:()=>cs,st,extras,icsRepo,instala,
 /* ================= economía: cálculos ================= */
 function ecoY(y,fijar){let Y=S.eco.years[y];if(Y)return Y;
   if(!tmpY[y]){const ys=Object.keys(S.eco.years).sort(),b=S.eco.years[ys[ys.length-1]];
-    Y={grupos:(b?b.grupos:[]).filter(g=>!g.hasta).map(g=>({id:uid(),nombre:g.nombre,hasta:null,filas:g.filas.map(r=>({id:uid(),nombre:r.nombre,v:Array(12).fill(null)}))})),variables:Array(12).fill(null),ingresos:Array(12).fill(null),cerrados:Array(12).fill(0)};tmpY[y]={Y,j:JSON.stringify(Y)}}
+    Y={grupos:(b?b.grupos:[]).filter(g=>gAct(g,11)).map(g=>({id:uid(),nombre:g.nombre,off:{},filas:g.filas.map(r=>({id:uid(),nombre:r.nombre,v:Array(12).fill(null)}))})),variables:Array(12).fill(null),ingresos:Array(12).fill(null),cerrados:Array(12).fill(0)};tmpY[y]={Y,j:JSON.stringify(Y)}}
   Y=tmpY[y].Y;if(fijar){S.eco.years[y]=Y;delete tmpY[y]}return Y}
 function ingreso(Y,y,m){if(Y.ingresos[m]!=null)return {v:Y.ingresos[m],src:'mano'};const n=SY.nomMes(y,m);if(n){if(n.real!=null)return {v:n.real,src:'real'};if(n.conf&&n.est)return {v:n.est,src:'est'}}return {v:null,src:null}}
-const gAct=(g,m)=>!g.hasta||m+1<=g.hasta;
+const gAct=(g,m)=>!(g.off&&g.off[m]);
 const gVal=(g,r,m)=>gAct(g,m)?r.v[m]:0;
 const gTot=(g,m)=>g.filas.reduce((a,r)=>a+(gVal(g,r,m)||0),0);
 const comun=(Y,m)=>r2(Y.grupos.reduce((a,g)=>a+gTot(g,m),0));
@@ -456,21 +473,38 @@ function hipoteca(Y,m){let t=0;Y.grupos.forEach(g=>g.filas.forEach(r=>{if(/hipot
 function medias(Y){const cl=[];for(let m=0;m<12;m++)if(Y.cerrados[m])cl.push(m);if(!cl.length)return null;
   let c=0,v=0,h=0;cl.forEach(m=>{const x=miMes(Y,m);c+=x.c;v+=x.v;h+=hipoteca(Y,m)});const n=cl.length,f=fijosMes(),t=c/n+v/n+f;
   return {n,c:c/n,v:v/n,f,t,anual:t*12,hip:h/n,hipPct:t?h/n/t:0}}
+function resumen(Y,y){const cl=[];for(let m=0;m<12;m++)if(Y.cerrados[m])cl.push(m);if(!cl.length)return null;
+  let c=0,v=0,h=0,ing=0,gi=0;const ci=[],co={};
+  cl.forEach(m=>{const x=miMes(Y,m),i=ingreso(Y,y,m).v;c+=x.c;v+=x.v;h+=hipoteca(Y,m);if(i){ci.push({m,ah:i-x.t});ing+=i;gi+=x.t}
+    Y.grupos.forEach(g=>g.filas.forEach(r=>{const z=(gVal(g,r,m)||0)*S.cfg.split/100;if(z){const k=g.id+'|'+r.id;(co[k]=co[k]||{n:r.nombre,s:g.nombre,v:0}).v+=z}}))});
+  const n=cl.length,f=fijosMes(),t=c/n+v/n+f,top=Object.values(co).map(x=>({n:x.n,s:x.s,v:x.v/n}));
+  if(v)top.push({n:'Gastos variables',s:'Tu total del mes',v:v/n});S.eco.fijos.forEach(x=>top.push({n:x.nombre,s:x.periodo==='mensual'?'Fijo mensual':'Fijo anual, prorrateado',v:x.periodo==='mensual'?x.importe:x.importe/12}));
+  top.sort((a,b)=>b.v-a.v);const R={n,c:c/n,v:v/n,f,t,anual:t*12,hip:h/n,hipPct:t?h/n/t:0,top:top.filter(x=>x.v>0).slice(0,6),ni:ci.length};
+  if(ci.length){const k=ci.length,ah=ing-gi;R.ingM=ing/k;R.ahM=ah/k;R.tasa=ing?ah/ing:null;R.ahAcum=ah;R.hipIng=ing?h/n/(ing/k):null;const o=ci.slice().sort((a,b)=>b.ah-a.ah);R.mejor=o[0];R.peor=o[o.length-1]}
+  return R}
 function avisosFijos(){const d=new Date(),out=[];S.eco.fijos.forEach(f=>{if(f.periodo!=='anual'||!f.mes)return;const dif=(f.mes-1-d.getMonth()+12)%12;if(dif<=1)out.push({f,dif})});return out}
 
 /* ================= inversiones: cálculos ================= */
-function invTot(cuenta){let v=0,c=0,g=0,sc=0;S.inv.pos.forEach(p=>{if(cuenta&&p.cuenta!==cuenta)return;v+=p.n*p.precio;if(p.coste!=null){c+=p.n*p.coste;g+=p.n*(p.precio-p.coste)}else sc++});return {v,c,g,gp:c?g/c:null,sc}}
+function invTot(cuenta){let v=0,vm=0,c=0,g=0,sc=0,nm=0;S.inv.pos.forEach(p=>{if(cuenta&&p.cuenta!==cuenta)return;const x=p.n*p.precio;v+=x;if(esSaldo(p))return;vm+=x;nm++;if(p.coste!=null){c+=p.n*p.coste;g+=p.n*(p.precio-p.coste)}else sc++});return {v,vm,va:v-vm,c,g,gp:c?g/c:null,sc,nm}}
+const hayMercado=()=>S.inv.pos.some(p=>!esSaldo(p));
 const flujo=(a,b)=>S.inv.mov.reduce((t,m)=>m.fecha>a&&m.fecha<=b?t+(m.tipo==='aportacion'?m.importe:m.tipo==='retirada'?-m.importe:0):t,0);
-function snap(){if(!S.inv.pos.length)return;const t=ymd(new Date()),v=r2(invTot().v),h=S.inv.hist,l=h[h.length-1];if(l&&l.f===t){if(l.v!==v){l.v=v;l.t=Date.now()}}else h.push({f:t,v,t:Date.now()})}
+function snap(){if(!hayMercado())return;const t=ymd(new Date()),v=r2(invTot().vm),h=S.inv.hist,l=h[h.length-1];if(l&&l.f===t){if(l.v!==v){l.v=v;l.t=Date.now()}}else h.push({f:t,v,t:Date.now()})}
 function twr(){const h=S.inv.hist;if(h.length<2)return null;let a=1;for(let i=1;i<h.length;i++){if(h[i-1].v>0)a*=(h[i].v-flujo(h[i-1].f,h[i].f))/h[i-1].v}return a-1}
-function cambioDia(){const t=ymd(new Date()),prev=S.inv.hist.filter(h=>h.f<t).pop();if(!prev||!S.inv.pos.length)return null;const d=invTot().v-prev.v-flujo(prev.f,t);return {d,p:prev.v?d/prev.v:null,desde:prev.f}}
+function cambioDia(){const t=ymd(new Date()),prev=S.inv.hist.filter(h=>h.f<t).pop();if(!prev||!hayMercado())return null;const d=invTot().vm-prev.v-flujo(prev.f,t);return {d,p:prev.v?d/prev.v:null,desde:prev.f}}
 function mesesHasta(V,meta,ap,rAnual){if(!meta||V>=meta)return 0;const r=Math.pow(1+rAnual/100,1/12)-1;let n=0,x=V;while(x<meta&&n<1200){x=x*(1+r)+ap;n++}return n>=1200?null:n}
 const sumMov=(tipo,pref)=>S.inv.mov.reduce((t,m)=>m.tipo===tipo&&m.fecha.startsWith(pref)?t+m.importe:t,0);
 
 /* ================= actividad: cálculos ================= */
 const TIPOS=['Carrera','Fuerza','Fitboxing','Bici','Natación','Caminata','Otro'];
 function sesSem(l){const a=ymd(l),b=ymd(addD(l,7));return S.act.ses.filter(s=>s.fecha>=a&&s.fecha<b)}
-function racha(){let l=lunes(hoy()),n=0;if(sesSem(l).length<S.cfg.metaSes)l=addD(l,-7);while(sesSem(l).length>=S.cfg.metaSes&&n<520){n++;l=addD(l,-7)}return n}
+const tiposAct=()=>[...new Set(TIPOS.slice(0,-1).concat(S.act.tipos||[],S.act.ses.map(x=>x.tipo).filter(t=>t&&t!=='Otro'),['Otro']))];
+function nuevoTipo(t){t=String(t).trim().replace(/\s+/g,' ');t=t[0].toUpperCase()+t.slice(1);const e=tiposAct().find(x=>x.toLowerCase()===t.toLowerCase());if(e)return e;S.act.tipos.push(t);return t}
+const metaIni=g=>{const h=hoy();return g.per==='mes'?new Date(h.getFullYear(),h.getMonth(),1):lunes(h)};
+function metaVal(g,ini){ini=ini||metaIni(g);const a=ymd(ini),b=ymd(g.per==='mes'?new Date(ini.getFullYear(),ini.getMonth()+1,1):addD(ini,7));
+  return r2(S.act.ses.reduce((t,x)=>x.fecha>=a&&x.fecha<b&&(!g.tipo||x.tipo===g.tipo)?t+(g.uni==='min'?x.min||0:g.uni==='km'?x.km||0:1):t,0))}
+const metaTxt=g=>FN.format(g.n)+' '+(g.uni==='ses'?(g.n===1?'entreno':'entrenos'):g.uni)+(g.tipo?' de '+g.tipo.toLowerCase():'')+(g.per==='mes'?' al mes':' a la semana');
+function metasProg(){const G=S.act.metas.filter(g=>g.n>0);return {G,ok:G.filter(g=>metaVal(g)>=g.n).length,f:G.length?G.reduce((a,g)=>a+Math.min(1,metaVal(g)/g.n),0)/G.length:null}}
+function racha(){const W=S.act.metas.filter(g=>g.per!=='mes'&&g.n>0);if(!W.length)return 0;const ok=l=>W.every(g=>metaVal(g,l)>=g.n);let l=lunes(hoy()),n=0;if(!ok(l))l=addD(l,-7);while(ok(l)&&n<520){n++;l=addD(l,-7)}return n}
 
 /* entrenos enviados desde la app Atajos del iPhone: una línea por entreno, «tipo;inicio;fin» */
 function pFecha(x){x=String(x||'').trim();if(!x)return null;const d=new Date(x);if(/^\d{4}-\d{2}-\d{2}/.test(x)&&!isNaN(d))return d;
@@ -562,6 +596,16 @@ function gCols(items,o){o=o||{};const W=340,H=o.h||170,pl=34,pr=o.avg!=null?34:6
     s+='</g><text x="'+(x+bw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+esc(it.lab)+'</text><rect class="hit" x="'+(pl+band*i)+'" y="'+pt+'" width="'+band+'" height="'+(ih+pb)+'" rx="6" data-tip="'+esc(it.tip||'')+'"/>'});
   if(o.avg!=null){const ya=y(o.avg);s+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+ya+'" y2="'+ya+'" stroke="var(--ink)" stroke-width="1"/><text x="'+(W-pr+4)+'" y="'+(ya+3.5)+'" style="fill:var(--ink2)">'+esc(o.avgLab||'media')+'</text>'}
   return s+'</svg>'}
+function botR(x,y,w,h,r){r=Math.min(r,h,w/2);return 'M'+x+','+y+'v'+(h-r)+'a'+r+','+r+' 0 0 0 '+r+','+r+'h'+(w-2*r)+'a'+r+','+r+' 0 0 0 '+r+','+(-r)+'v'+(-(h-r))+'z'}
+function gSig(items,o){o=o||{};const W=340,H=o.h||170,pl=38,pr=o.avg!=null?34:6,pt=10,pb=22,iw=W-pl-pr,ih=H-pt-pb,vs=items.filter(i=>i.v!=null).map(i=>i.v);
+  const hi=nice(Math.max(1,o.avg||0,...vs)),lr=Math.min(0,...vs),lo=lr<0?-nice(-lr):0,y=v=>pt+ih-(v-lo)/(hi-lo)*ih,band=iw/items.length,bw=Math.min(24,band*.62),mx=Math.max(hi,-lo);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.alt||'')+'">';
+  (lo<0?[lo,0,hi]:[0,hi/2,hi]).forEach(v=>{const yy=y(v);s+='<line class="grid" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+yy+'" y2="'+yy+'"'+(v===0&&lo<0?' style="stroke:var(--ink3)"':'')+'/><text x="'+(pl-5)+'" y="'+(yy+3.5)+'" text-anchor="end">'+tick(v,mx)+'</text>'});
+  items.forEach((it,i)=>{const x=pl+band*i+(band-bw)/2;
+    if(it.v!=null&&it.v!==0){const hh=Math.max(1.5,Math.abs(y(it.v)-y(0)));s+='<path'+(it.dim?' opacity=".45"':'')+' d="'+(it.v>0?topR(x,y(0)-hh,bw,hh,4):botR(x,y(0),bw,hh,4))+'" fill="var(--accent)"/>'}
+    s+='<text x="'+(x+bw/2)+'" y="'+(H-6)+'" text-anchor="middle">'+esc(it.lab)+'</text><rect class="hit" x="'+(pl+band*i)+'" y="'+pt+'" width="'+band+'" height="'+(ih+pb)+'" rx="6" data-tip="'+esc(it.tip||'')+'"/>'});
+  if(o.avg!=null){const ya=y(o.avg);s+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+ya+'" y2="'+ya+'" stroke="var(--ink)" stroke-width="1"/><text x="'+(W-pr+4)+'" y="'+(ya+3.5)+'" style="fill:var(--ink2)">media</text>'}
+  return s+'</svg>'}
 function gLinea(pts,o){o=o||{};const W=340,H=o.h||150,pl=40,pr=14,pt=14,pb=22,iw=W-pl-pr,ih=H-pt-pb,vs=pts.map(p=>p.v);
   let lo=Math.min(...vs),hi=Math.max(...vs);if(hi===lo){hi=lo+1;lo=Math.max(0,lo-1)}const padv=(hi-lo)*.12;lo=Math.max(0,lo-padv);hi+=padv;
   const X=i=>pl+(pts.length===1?iw/2:iw*i/(pts.length-1)),Y=v=>pt+ih-(v-lo)/(hi-lo)*ih;
@@ -605,7 +649,7 @@ V.inicio=()=>{const d=new Date(),h=hoy(),k=ymd(h),Y=ecoY(String(d.getFullYear())
   s+='<section><div class="sh"><h2>Resumen</h2></div><div class="tiles">';
   s+='<button class="tile" data-a="tab" data-t="eco"><span class="l">'+ic('eco')+'Gasto de '+MES[m].toLowerCase()+'</span><span class="val">'+M(mm.t,0)+'</span>'+(me?meter(mm.t/me.t):'')+'<span class="s">'+(me?'Media mensual '+M(me.t,0):'Mes en curso')+'</span></button>';
   s+='<button class="tile" data-a="tab" data-t="inv"><span class="l">'+ic('inv')+'Inversiones</span><span class="val">'+(S.inv.pos.length?M(it.v,0):'—')+'</span><span class="s">'+(S.inv.pos.length?(cd?'Desde el '+fFecha(cd.desde)+' '+sig(cd.d,0):it.c?'Ganancia '+sig(it.g,0):S.inv.pos.length+' valores'):'Sin posiciones todavía')+'</span></button>';
-  s+='<button class="tile" data-a="tab" data-t="act"><span class="l">'+ic('act')+'Entrenos esta semana</span><span class="val">'+ss.length+' de '+S.cfg.metaSes+'</span>'+meter(ss.length/S.cfg.metaSes)+'<span class="s">'+mins+' min'+(rc?' · racha de '+rc+' sem':'')+'</span></button>';
+  {const mp=metasProg(),u=mp.G.length===1?mp.G[0]:null;s+='<button class="tile" data-a="tab" data-t="act"><span class="l">'+ic('act')+(mp.G.length?'Metas de actividad':'Entrenos esta semana')+'</span><span class="val">'+(u?FN.format(metaVal(u))+' de '+FN.format(u.n):mp.G.length?mp.ok+' de '+mp.G.length:ss.length)+'</span>'+(mp.f!=null?meter(mp.f):'')+'<span class="s">'+(u?metaTxt(u).replace(/^[\d.,]+ /,'').replace(/^./,c=>c.toUpperCase()):'Esta semana: '+ss.length+(ss.length===1?' entreno':' entrenos')+' · '+mins+' min')+(rc?' · racha de '+rc+' sem':'')+'</span></button>'}
   s+='<button class="tile" data-a="tab" data-t="obj"><span class="l">'+ic('obj')+'Propósitos</span><span class="val">'+(dia.length?hechos+' de '+dia.length+' hoy':'—')+'</span>'+(prog!=null?meter(prog):'')+'<span class="s">'+(prog!=null?'Mes y año al '+pct(prog):'Añade los tuyos')+'</span></button>';
   return s+'</div></section>'};
 function semSec(w){const h=hoy(),l=addD(lunes(h),7*w),re=libresRe();let gu=false;
@@ -648,12 +692,12 @@ V.eco=()=>{const Y=ecoY(U.ecoY),m=U.ecoM,ys=[...new Set(Object.keys(S.eco.years)
     '<div class="kv"><span>Ahorro</span><b data-b="ah"></b></div></div><div data-b="pen"></div><div class="btns"><button class="btn s" data-a="cerrarMes">'+(Y.cerrados[m]?'Reabrir mes':'Cerrar mes')+'</button></div></div></section>';
   s+='<section><div class="card"><h3>Tus gastos variables</h3><div class="row"><span class="g">Total del mes</span><input class="imp" inputmode="decimal" placeholder="sin apuntar" data-eco="var" value="'+fIn(Y.variables[m])+'" aria-label="Gastos variables"></div></div></section></div><div>';
   Y.grupos.slice().sort((a,b)=>(gAct(b,m)?1:0)-(gAct(a,m)?1:0)).forEach(g=>{s+='<section><div class="card"><div class="sh" style="margin:0 0 4px"><button class="nomb" data-a="grpEdit" data-g="'+g.id+'" style="min-height:0"><h3>'+esc(g.nombre)+'</h3></button><b class="num" data-b="g:'+g.id+'"></b></div>';
-    if(!gAct(g,m))s+='<div class="muted small">Sin gastos desde '+MES[g.hasta].toLowerCase()+'.</div>';
+    if(!gAct(g,m))s+='<div class="kv" style="padding-bottom:0"><span class="muted small">No cuenta en '+MES[m].toLowerCase()+'.</span><button class="link" data-a="grpOn" data-g="'+g.id+'">Poner en '+MES[m].toLowerCase()+'</button></div>';
     else{g.filas.forEach(r=>s+='<div class="row"><button class="nomb" data-a="filaEdit" data-g="'+g.id+'" data-r="'+r.id+'">'+esc(r.nombre)+'</button><input class="imp" inputmode="decimal" placeholder="sin apuntar" data-eco="g:'+g.id+':'+r.id+'" value="'+fIn(r.v[m])+'" aria-label="'+esc(r.nombre)+'"></div>');
       s+='<div class="btns"><button class="btn s" data-a="filaNueva" data-g="'+g.id+'">Añadir concepto</button></div>'}
     s+='</div></section>'});
   s+='<button class="btn s" data-a="grpNuevo">Añadir vivienda o grupo</button></div></div>';
-  s+='<section style="margin-top:22px"><div class="sh"><h2>Año '+U.ecoY+'</h2></div><div class="card"><div class="viz mny" id="ecoChart"></div><div class="ley"><span><i style="background:var(--s1)"></i>Común, tu parte</span><span><i style="background:var(--s2)"></i>Variables</span><span><i style="background:var(--s3)"></i>Fijos</span><span class="muted">Meses sin cerrar, atenuados</span></div><div data-b="med" style="margin-top:10px"></div></div></section>';
+  s+='<section style="margin-top:22px"><div class="sh"><h2>Año '+U.ecoY+'</h2></div><div class="card"><div class="viz mny" id="ecoChart"></div><div class="ley"><span><i style="background:var(--s1)"></i>Común, tu parte</span><span><i style="background:var(--s2)"></i>Variables</span><span><i style="background:var(--s3)"></i>Fijos</span><span class="muted">Meses sin cerrar, atenuados</span></div></div></section><div data-b="med"></div>';
   return s};
 function ecoBind(){const Y=ecoY(U.ecoY),m=U.ecoM,x=miMes(Y,m),ig=ingreso(Y,U.ecoY,m),ing=ig.v,p=pendientes(Y,m),me=medias(Y),B={};
   B.ingSrc=({mano:'Apuntado a mano',real:'Cobrado, según Nómina: '+M(ing),est:'Estimado por Nómina: '+M(ing)})[ig.src]||(SY.on()?'Nómina no tiene datos de este mes':'Conecta Nómina en Ajustes');
@@ -661,10 +705,28 @@ function ecoBind(){const Y=ecoY(U.ecoY),m=U.ecoM,x=miMes(Y,m),ig=ingreso(Y,U.eco
   B.ah=ing?sig(ing-x.t)+' <span class="muted small">'+pct((ing-x.t)/ing)+'</span>':'<span class="muted">Apunta el ingreso</span>';
   B.pen=p.length&&!Y.cerrados[m]?'<div class="aviso"><span>'+p.length+' sin apuntar: '+esc(p.slice(0,4).join(', '))+(p.length>4?' y '+(p.length-4)+' más':'')+'.</span></div>':'';
   Y.grupos.forEach(g=>B['g:'+g.id]=gAct(g,m)?M(gTot(g,m)):'');
-  B.med=me?'<div class="kv"><span>Media mensual ('+me.n+' meses cerrados)</span><b>'+M(me.t)+'</b></div><div class="kv"><span>Gasto anual estimado</span><b>'+M(me.anual)+'</b></div><div class="kv"><span>Hipoteca sobre tu gasto</span><b>'+pct(me.hipPct)+'</b></div>':'<span class="muted small">Cierra un mes para ver medias.</span>';
+  {const R=resumen(Y,U.ecoY),hoyM=U.ecoY===String(new Date().getFullYear())?new Date().getMonth():11,kv=(a,b)=>'<div class="kv"><span>'+a+'</span><b>'+b+'</b></div>',mes=i=>MES[i].toLowerCase();
+    if(!R)B.med='<section><div class="card muted small">Cierra un mes para ver tus medias, tu ahorro y en qué se va el dinero.</div></section>';
+    else{let h='<div class="cols" style="margin-top:14px"><section><div class="sh"><h2>Ahorro</h2></div><div class="card">';
+      if(R.ni){h+='<div class="viz mny" id="ahChart"></div><p class="muted small" style="margin:6px 0 10px">Ingreso neto menos tu gasto de cada mes. Meses sin cerrar, atenuados.</p>'+
+          kv('Ahorro medio al mes',sig(R.ahM)+' <span class="muted small">'+pct(R.tasa)+'</span>')+kv('Ingreso medio al mes',M(R.ingM))+kv('Gasto medio al mes',M(R.t))+kv('Ahorrado en '+R.ni+(R.ni>1?' meses cerrados':' mes cerrado'),sig(R.ahAcum))+kv('Ahorro anual a este ritmo',sig(R.ahM*12))+
+          (R.ni>1?kv('Mejor mes: '+mes(R.mejor.m),sig(R.mejor.ah))+kv('Peor mes: '+mes(R.peor.m),sig(R.peor.ah)):'')}
+      else h+='<div class="muted small">Falta el ingreso de los meses cerrados. Apúntalo en cada mes o conecta Nómina en Ajustes para ver tu ahorro.</div>'+kv('Gasto medio al mes ('+R.n+(R.n>1?' meses':' mes')+')',M(R.t));
+      h+=kv('Gasto anual estimado',M(R.anual))+'</div></section><section><div class="sh"><h2>En qué se va</h2></div><div class="card">';
+      [['Común, tu parte',R.c],['Variables',R.v],['Fijos prorrateados',R.f]].forEach(x=>{const f=R.t?x[1]/R.t:0;h+='<div class="barra"><span class="t">'+x[0]+'</span><b class="num">'+M(x[1],0)+' · '+pct(f)+'</b><div class="tr"><i style="width:'+(f*100).toFixed(1)+'%"></i></div></div>'});
+      if(R.top.length){h+='<h3 class="sep">Tus mayores gastos al mes</h3>';R.top.forEach(x=>{h+='<div class="row"><span class="g"><span class="t">'+esc(x.n)+'</span><span class="s">'+esc(x.s)+'</span></span><span class="v">'+M(x.v,0)+'<br><span class="small muted" style="font-family:var(--sans);font-weight:500">'+pct(R.t?x.v/R.t:0)+'</span></span></div>'})}
+      h+='</div></section></div><section><div class="sh"><h2>Para situarte</h2></div><div class="card">';const F=[];
+      if(R.ni&&R.ingM>0){const g=Math.round(R.t/R.ingM*100);F.push('De cada 100 € que ingresas, gastas <b>'+g+' €</b> y '+(g<=100?'ahorras <b>'+(100-g)+' €</b>.':'te faltan <b>'+(g-100)+' €</b>.'))}
+      if(R.hip>0)F.push('La hipoteca son '+M(R.hip,0)+' al mes: el <b>'+pct(R.hipPct)+'</b> de tu gasto'+(R.hipIng!=null?' y el <b>'+pct(R.hipIng)+'</b> de tu ingreso.':'.'));
+      {const fx=R.c+R.f;F.push('Entre gastos comunes y fijos tienes comprometidos '+M(fx,0)+' al mes antes de tus gastos variables'+(R.ni&&R.ingM>0?', el <b>'+pct(fx/R.ingM)+'</b> de tu ingreso.':'.'))}
+      {const it=invTot();if(it.v>0&&R.t>0)F.push('Tu inversión y ahorro ('+M(it.v,0)+') equivalen a <b>'+FN.format(Math.round(it.v/R.t*10)/10)+' meses</b> de tu gasto medio.')}
+      if(R.ni&&R.ahM>0&&S.cfg.aportMes>0)F.push('Tu aportación mensual prevista a inversión ('+M(S.cfg.aportMes,0)+') es el <b>'+pct(S.cfg.aportMes/R.ahM)+'</b> de tu ahorro medio.');
+      B.med=h+F.map(x=>'<p class="frase">'+x+'</p>').join('')+'<p class="muted small" style="margin:10px 0 0">Todo calculado con los '+R.n+' meses cerrados de '+U.ecoY+'.</p></div></section>';
+      B._ah=R.ni?{R,hoyM}:null}}
   document.querySelectorAll('[data-b]').forEach(e=>{const k=e.dataset.b;if(k in B)e.innerHTML=B[k]});
   const ch=$('#ecoChart');if(ch){const sw=c=>'<i style="background:var(--'+c+')"></i>';
-    ch.innerHTML=gCols(MESC.map((n,i)=>{const z=miMes(Y,i);return {lab:n[0],dim:!Y.cerrados[i],segs:[{v:z.c,c:'var(--s1)'},{v:z.v,c:'var(--s2)'},{v:z.f,c:'var(--s3)'}],tip:'<b>'+MES[i]+' · '+M(z.t)+'</b><br>'+sw('s1')+'Común '+M(z.c)+'<br>'+sw('s2')+'Variables '+M(z.v)+'<br>'+sw('s3')+'Fijos '+M(z.f)}}),{avg:me?me.t:null,alt:'Tu gasto mensual de '+U.ecoY+' por partes'})}}
+    ch.innerHTML=gCols(MESC.map((n,i)=>{const z=miMes(Y,i);return {lab:n[0],dim:!Y.cerrados[i],segs:[{v:z.c,c:'var(--s1)'},{v:z.v,c:'var(--s2)'},{v:z.f,c:'var(--s3)'}],tip:'<b>'+MES[i]+' · '+M(z.t)+'</b><br>'+sw('s1')+'Común '+M(z.c)+'<br>'+sw('s2')+'Variables '+M(z.v)+'<br>'+sw('s3')+'Fijos '+M(z.f)}}),{avg:me?me.t:null,alt:'Tu gasto mensual de '+U.ecoY+' por partes'})}
+  const ah=$('#ahChart');if(ah&&B._ah){ah.innerHTML=gSig(MESC.map((n,i)=>{const ig=ingreso(Y,U.ecoY,i).v,z=miMes(Y,i),ok=ig&&(Y.cerrados[i]||i<=B._ah.hoyM);return {lab:n[0],v:ok?ig-z.t:null,dim:!Y.cerrados[i],tip:ok?'<b>'+MES[i]+' · '+sig(ig-z.t)+'</b><br>Ingreso '+M(ig)+'<br>Gasto '+M(z.t)+(Y.cerrados[i]?'':'<br>Mes sin cerrar'):'<b>'+MES[i]+'</b><br>Sin datos'}}),{avg:B._ah.R.ahM,alt:'Tu ahorro de cada mes de '+U.ecoY})}}
 function ecoAnio(Y){const c=(v,pen)=>'<td class="money'+(pen?' pen':'')+'">'+(v==null?'·':FT.format(r2(v)))+'</td>';
   let s='<section style="margin-top:14px"><div class="card"><div class="tw"><table><thead><tr><th>'+U.ecoY+'</th>'+MESC.map(n=>'<th>'+n+'</th>').join('')+'</tr></thead><tbody>';
   Y.grupos.forEach(g=>{s+='<tr class="grp"><td colspan="13">'+esc(g.nombre)+'</td></tr>';g.filas.forEach(r=>{s+='<tr><td>'+esc(r.nombre)+'</td>'+r.v.map((v,i)=>gAct(g,i)?c(v,v==null):'<td class="pen">–</td>').join('')+'</tr>'});
@@ -677,29 +739,34 @@ function ecoFijos(){const fm=fijosMes(),an=S.eco.fijos.filter(f=>f.periodo==='an
   return '<section style="margin-top:14px"><div class="card"><div class="sh" style="margin:0"><h3>Fijos prorrateados al mes</h3></div><div class="big">'+M(fm)+'</div><div class="kv" style="margin-top:8px"><span>Anuales</span><b>'+M(an.reduce((a,f)=>a+f.importe,0))+' al año</b></div><div class="kv"><span>Mensuales</span><b>'+M(mn.reduce((a,f)=>a+f.importe,0))+' al mes</b></div><div class="btns"><button class="btn s pri" data-a="fijoNuevo">Añadir gasto fijo</button></div></div></section>'+
     '<div class="cols"><section><div class="sh"><h2>Mensuales</h2></div><div class="card">'+(mn.map(li).join('')||'<div class="vacio">Ninguno</div>')+'</div></section><section><div class="sh"><h2>Anuales</h2></div><div class="card">'+(an.map(li).join('')||'<div class="vacio">Ninguno</div>')+'</div></section></div>'}
 
-V.inv=()=>{const t=invTot(),cd=cambioDia(),w=twr(),y=String(new Date().getFullYear());
-  let s=cab('Inversiones','ING e Interactive Brokers','<button class="ib pri" data-a="posNueva" aria-label="Añadir posición">'+ic('plus')+'</button>');
-  if(!S.inv.pos.length)s+='<section><div class="card vacio"><b>Aún no hay posiciones</b>Carga el informe de posición global de ING en PDF o añade cada valor a mano.<div class="btns" style="justify-content:center"><button class="btn pri" data-a="pdfIng">Leer PDF de ING</button><button class="btn" data-a="posNueva">Añadir posición</button></div></div></section>';
-  else{const cuentas=[...new Set(S.inv.pos.map(p=>p.cuenta))];
-    s+='<div class="cols"><div><section><div class="card"><h3>Valor de la cartera</h3><div class="big">'+M(t.v)+'</div><div style="margin-top:10px">'+(t.c?'<div class="kv"><span>Ganancia'+(t.sc?' (solo '+(S.inv.pos.length-t.sc)+' de '+S.inv.pos.length+' con precio de compra)':' sobre lo invertido')+'</span><b>'+sig(t.g)+' '+spct(t.gp)+'</b></div>':'<div class="muted small" style="padding:6px 0">Toca cada valor y añade su precio medio de compra para ver la ganancia.</div>')+
+V.inv=()=>{const t=invTot(),cd=cambioDia(),w=twr(),y=String(new Date().getFullYear()),P=S.inv.pos,ord=a=>a.slice().sort((a,b)=>b.n*b.precio-a.n*a.precio);
+  let s=cab('Inversiones','Por banco y tipo de producto','<button class="ib pri" data-a="posNueva" aria-label="Añadir producto">'+ic('plus')+'</button>');
+  if(!P.length)s+='<section><div class="card vacio"><b>Aún no hay productos</b>Carga los PDF de ING o añade a mano acciones, fondos, ETF, renta fija o ahorro.<div class="btns" style="justify-content:center"><button class="btn pri" data-a="pdfIng">PDF de cartera de ING</button><button class="btn" data-a="pdfOps">PDF de compras y ventas</button><button class="btn" data-a="posNueva">Añadir producto</button><button class="btn" data-a="cuentas">Bancos</button></div></div></section>';
+  else{const cuentas=S.inv.cuentas.concat([...new Set(P.map(p=>p.cuenta))].filter(c=>!S.inv.cuentas.includes(c))).filter(c=>P.some(p=>p.cuenta===c));
+    s+='<div class="cols"><div><section><div class="card"><h3>Valor total</h3><div class="big">'+M(t.v)+'</div><div style="margin-top:10px">'+(t.c?'<div class="kv"><span>Ganancia'+(t.sc?' (solo '+(t.nm-t.sc)+' de '+t.nm+' con precio de compra)':' sobre lo invertido')+'</span><b>'+sig(t.g)+' '+spct(t.gp)+'</b></div>':t.nm?'<div class="muted small" style="padding:6px 0">Lee el PDF de compras y ventas o añade el precio medio de compra de cada valor para ver la ganancia.</div>':'')+
       (cd?'<div class="kv"><span>Desde el '+fFecha(cd.desde)+'</span><b>'+sig(cd.d)+' '+spct(cd.p)+'</b></div>':'')+(w!=null?'<div class="kv"><span>Rentabilidad TWR registrada</span><b>'+spct(w)+'</b></div>':'')+
-      cuentas.map(c=>'<div class="kv"><span>'+esc(c)+'</span><b>'+M(invTot(c).v)+'</b></div>').join('')+'</div><div class="btns"><button class="btn s" data-a="pdfIng">Leer PDF de ING</button><button class="btn s" data-a="precios">Actualizar precios</button></div></div></section>';
-    s+='<section><div class="sh"><h2>Posiciones</h2></div><div class="card">'+S.inv.pos.slice().sort((a,b)=>b.n*b.precio-a.n*a.precio).map(p=>{const v=p.n*p.precio,g=p.coste?(p.precio-p.coste)/p.coste:null;return '<button class="row" data-a="posEdit" data-id="'+p.id+'"><span class="g"><span class="t">'+esc(p.nombre)+'</span><span class="s">'+esc(p.cuenta)+(p.ticker?' · '+esc(p.ticker):'')+' · '+FN.format(p.n)+' × '+eur(p.precio)+'</span></span><span class="v">'+M(v)+'<br><span class="small">'+(g!=null?spct(g):'<span class="muted" style="font-family:var(--sans);font-weight:500">sin precio de compra</span>')+'</span></span></button>'}).join('')+'</div></section></div><div>';
-    s+='<section><div class="sh"><h2>Reparto</h2></div><div class="card">'+S.inv.pos.slice().sort((a,b)=>b.n*b.precio-a.n*a.precio).map(p=>{const f=t.v?p.n*p.precio/t.v:0;return '<div class="barra"><span class="t">'+esc(p.nombre)+'</span><b class="num">'+pct(f)+'</b><div class="tr"><i style="width:'+(f*100).toFixed(1)+'%"></i></div></div>'}).join('')+'</div></section>';
-    if(S.inv.hist.length>1)s+='<section><div class="sh"><h2>Evolución</h2></div><div class="card viz mny">'+gLinea(S.inv.hist.slice(-120).map(h=>{const v=h.f===ymd(new Date())?r2(t.v):h.v;return {lab:fFecha(h.f),v,tip:'<b>'+fFecha(h.f)+'</b><br>'+M(v)}}),{alt:'Valor de la cartera por día'})+'</div></section>';
-    else s+='<section><div class="card muted small">La evolución aparecerá cuando haya valores de dos días distintos. La app guarda el valor cada día que se abre.</div></section>';
+      (t.va&&t.vm?'<div class="kv"><span>En mercado</span><b>'+M(t.vm)+'</b></div><div class="kv"><span>Ahorro y depósitos</span><b>'+M(t.va)+'</b></div>':'')+'</div><div class="btns"><button class="btn s" data-a="pdfIng">PDF de cartera de ING</button><button class="btn s" data-a="pdfOps">PDF de compras y ventas</button><button class="btn s" data-a="precios">Actualizar precios</button><button class="btn s" data-a="cuentas">Bancos</button></div></div></section>';
+    const fila=p=>{const v=p.n*p.precio,sa=esSaldo(p),g=!sa&&p.coste?(p.precio-p.coste)/p.coste:null;return '<button class="row" data-a="posEdit" data-id="'+p.id+'"><span class="g"><span class="t">'+esc(p.nombre)+'</span><span class="s">'+prodN(p.tipo)+(sa?(p.tae?' · '+FN.format(p.tae)+' % anual':'')+(p.vence?' · vence el '+fFecha(p.vence):''):(p.ticker?' · '+esc(p.ticker):'')+' · '+FN.format(p.n)+' × '+eur(p.precio))+'</span></span><span class="v">'+M(v)+(sa?'':'<br><span class="small">'+(g!=null?spct(g):'<span class="muted" style="font-family:var(--sans);font-weight:500">sin precio de compra</span>')+'</span>')+'</span></button>'};
+    cuentas.forEach(c=>{const tc=invTot(c);s+='<section><div class="sh"><h2>'+esc(c)+'</h2><b class="num">'+M(tc.v)+'</b></div><div class="card">'+(tc.c?'<div class="kv small" style="padding-top:0;border-bottom:1px solid var(--line)"><span class="muted">Ganancia'+(tc.sc?' ('+(tc.nm-tc.sc)+' de '+tc.nm+' valores)':'')+'</span><b>'+sig(tc.g)+' '+spct(tc.gp)+'</b></div>':'')+ord(P.filter(p=>p.cuenta===c)).map(fila).join('')+'</div></section>'});
+    s+='</div><div>';
+    const bar=(n,v)=>{const f=t.v?v/t.v:0;return '<div class="barra"><span class="t">'+esc(n)+'</span><b class="num">'+pct(f)+'</b><div class="tr"><i style="width:'+(f*100).toFixed(1)+'%"></i></div></div>'},pt={};P.forEach(p=>pt[p.tipo]=(pt[p.tipo]||0)+p.n*p.precio);
+    s+='<section><div class="sh"><h2>Reparto</h2></div><div class="card">'+(Object.keys(pt).length>1?'<h3>Por tipo de producto</h3>'+Object.entries(pt).sort((a,b)=>b[1]-a[1]).map(x=>bar(prodN(x[0]),x[1])).join('')+'<h3 class="sep">Por producto</h3>':'')+ord(P).map(p=>bar(p.nombre,p.n*p.precio)).join('')+'</div></section>';
+    if(S.inv.hist.length>1)s+='<section><div class="sh"><h2>Evolución'+(t.va?' en mercado':'')+'</h2></div><div class="card viz mny">'+gLinea(S.inv.hist.slice(-120).map(h=>{const v=h.f===ymd(new Date())?r2(t.vm):h.v;return {lab:fFecha(h.f),v,tip:'<b>'+fFecha(h.f)+'</b><br>'+M(v)}}),{alt:'Valor de la cartera por día'})+(t.va?'<p class="muted small" style="margin:8px 0 0">Sin contar cuentas de ahorro ni depósitos.</p>':'')+'</div></section>';
+    else if(t.nm)s+='<section><div class="card muted small">La evolución aparecerá cuando haya valores de dos días distintos. La app guarda el valor cada día que se abre.</div></section>';
     s+='</div></div>'}
   // objetivo
   const o=S.cfg.objInv,n=o?mesesHasta(t.v,o,S.cfg.aportMes||0,S.cfg.rent):null;
   s+='<div class="cols"><section><div class="sh"><h2>Objetivo</h2><a href="#" data-a="objInv">'+(o?'Cambiar':'Definir')+'</a></div><div class="card">'+(o?'<div class="kv"><span>Llevas</span><b>'+M(t.v,0)+' de '+M(o,0)+'</b></div>'+meter(t.v/o)+'<div class="muted small">'+(n===0?'Objetivo alcanzado.':n==null?'Con esta aportación no se alcanza.':'Con '+M(S.cfg.aportMes||0,0)+' al mes y un '+FN.format(S.cfg.rent)+' % anual: '+MES[(new Date().getMonth()+n)%12].toLowerCase()+' de '+(new Date().getFullYear()+Math.floor((new Date().getMonth()+n)/12))+' ('+FN.format(Math.round(n/12*10)/10)+' años).')+'</div>':'<div class="muted">Define una cifra objetivo y tu aportación mensual para ver cuándo llegarías.</div>')+'</div></section>';
   s+='<section><div class="sh"><h2>Movimientos</h2><a href="#" data-a="movNuevo">Añadir</a></div><div class="card"><div class="kv"><span>Aportado en '+y+'</span><b>'+M(sumMov('aportacion',y))+'</b></div><div class="kv"><span>Dividendos cobrados en '+y+'</span><b>'+M(sumMov('dividendo',y))+'</b></div>'+
-    S.inv.mov.slice().sort((a,b)=>a.fecha<b.fecha?1:-1).slice(0,8).map(m=>'<button class="row" data-a="movEdit" data-id="'+m.id+'"><span class="g"><span class="t">'+({aportacion:'Aportación',retirada:'Retirada',dividendo:'Dividendo'})[m.tipo]+(m.nota?' · '+esc(m.nota):'')+'</span><span class="s">'+fFecha(m.fecha)+' · '+esc(m.cuenta||'')+'</span></span><span class="v">'+M(m.importe)+'</span></button>').join('')+
+    S.inv.mov.slice().sort((a,b)=>a.fecha<b.fecha?1:-1).slice(0,8).map(m=>'<button class="row" data-a="movEdit" data-id="'+m.id+'"><span class="g"><span class="t">'+({aportacion:'Aportación',retirada:'Retirada',dividendo:'Dividendo'})[m.tipo]+(m.nota?' · '+esc(m.nota):'')+'</span><span class="s">'+fFecha(m.fecha)+(m.cuenta?' · '+esc(m.cuenta):'')+'</span></span><span class="v">'+M(m.importe)+'</span></button>').join('')+
     '<p class="muted small" style="margin:10px 0 0">Apunta cada aportación: así la rentabilidad no cuenta el dinero nuevo como ganancia.</p></div></section></div>';
   return s};
 
 V.act=()=>{const l=lunes(hoy()),ss=sesSem(l),mins=ss.reduce((a,x)=>a+(x.min||0),0),rc=racha(),mk=perKey('mes');
   let s=cab('Actividad','Del Apple Watch y a mano','<button class="ib pri" data-a="sesNueva" aria-label="Añadir entreno">'+ic('plus')+'</button>');
-  s+='<div class="cols"><div><section><div class="card"><h3>Esta semana</h3><div class="big">'+ss.length+' de '+S.cfg.metaSes+' sesiones</div>'+meter(ss.length/S.cfg.metaSes)+'<div class="kv" style="margin-top:8px"><span>Minutos</span><b>'+mins+'</b></div><div class="kv"><span>Racha de semanas cumplidas</span><b>'+rc+'</b></div></div></section>';
+  const G=S.act.metas;
+  s+='<div class="cols"><div><section><div class="card"><h3>Esta semana</h3><div class="big">'+ss.length+(ss.length===1?' entreno':' entrenos')+'</div><div class="kv" style="margin-top:8px"><span>Minutos</span><b>'+mins+'</b></div>'+(G.some(g=>g.per!=='mes')?'<div class="kv"><span>Semanas seguidas cumpliendo tus metas</span><b>'+rc+'</b></div>':'')+'</div></section>';
+  s+='<section><div class="sh"><h2>Tus metas</h2><a href="#" data-a="metaNueva">Añadir</a></div><div class="card">'+(G.length?G.map(g=>{const v=metaVal(g),ok=v>=g.n;return '<button class="row meta" data-a="metaEdit" data-id="'+g.id+'"><span class="g"><span class="t">'+metaTxt(g).replace(/^./,c=>c.toUpperCase())+'</span><span class="s">'+(g.per==='mes'?'Este mes':'Esta semana')+(ok?' · conseguida':'')+'</span></span><span class="v">'+FN.format(v)+' de '+FN.format(g.n)+'</span><span class="mt">'+meter(g.n?v/g.n:0)+'</span></button>'}).join(''):'<div class="vacio"><b>Sin metas</b>Por ejemplo: 2 entrenos de carrera a la semana, 2 de fuerza, 60 km al mes.</div>')+'</div></section>';
   const w=[];for(let i=7;i>=0;i--){const a=addD(l,-7*i),x=sesSem(a);w.push({lab:a.getDate()+'/'+(a.getMonth()+1),segs:[{v:x.reduce((t,y)=>t+(y.min||0),0),c:'var(--s1)'}],tip:'<b>Semana del '+fFecha(ymd(a))+'</b><br>'+x.length+' sesiones · '+x.reduce((t,y)=>t+(y.min||0),0)+' min'})}
   s+='<section><div class="sh"><h2>Minutos por semana</h2></div><div class="card viz">'+gCols(w,{h:150,min:60,alt:'Minutos de entreno en las últimas 8 semanas'})+'</div></section></div><div>';
   const mes=S.act.ses.filter(x=>x.fecha.startsWith(mk)),por={};mes.forEach(x=>{por[x.tipo]=por[x.tipo]||{n:0,m:0};por[x.tipo].n++;por[x.tipo].m+=x.min||0});
@@ -734,10 +801,10 @@ function cambio(){snap();guardar();render()}
 let hoja=null;
 function sheet(o){hoja=o;const v=o.val||{};let h='<div class="hd"><h2>'+esc(o.titulo)+'</h2><button class="ib" data-a="cerrarHoja" aria-label="Cerrar">'+ic('x')+'</button></div>'+(o.intro?'<p class="muted small" style="margin:0">'+o.intro+'</p>':'')+'<form id="hf" autocomplete="off">';
   (o.campos||[]).forEach(c=>{const val=v[c.k]??c.def??'';
-    if(c.tipo==='select')h+='<label class="f"><span>'+c.l+'</span><select name="'+c.k+'">'+c.ops.map(x=>'<option value="'+esc(x[0])+'"'+(String(val)===String(x[0])?' selected':'')+'>'+esc(x[1])+'</option>').join('')+'</select></label>';
+    if(c.tipo==='select')h+='<label class="f"><span>'+c.l+'</span><select name="'+c.k+'">'+c.ops.map(x=>'<option value="'+esc(x[0])+'"'+(String(val)===String(x[0])?' selected':'')+'>'+esc(x[1])+'</option>').join('')+'</select>'+(c.ay?'<small>'+c.ay+'</small>':'')+'</label>';
     else if(c.tipo==='check')h+='<label class="f chk"><input type="checkbox" name="'+c.k+'"'+(val?' checked':'')+'><span>'+c.l+'</span></label>';
     else h+='<label class="f"><span>'+c.l+'</span><input name="'+c.k+'" type="'+(c.tipo==='num'?'text':c.tipo||'text')+'"'+(c.tipo==='num'?' inputmode="decimal"':'')+' value="'+esc(c.tipo==='num'&&typeof val==='number'?String(val).replace('.',','):val)+'"'+(c.ph?' placeholder="'+esc(c.ph)+'"':'')+(c.req?' required':'')+(c.at?' '+c.at:'')+'>'+(c.ay?'<small>'+c.ay+'</small>':'')+'</label>'});
-  h+=(o.extra||'')+'<div class="btns" style="margin-top:18px">'+(o.guardar?'<button class="btn pri" type="submit" style="flex:1">'+(o.txt||'Guardar')+'</button>':'')+(o.borrar?'<button class="btn pel" type="button" data-a="borrarHoja">Borrar</button>':'')+'</div></form>';
+  h+=(o.extra||'')+'<div class="btns" style="margin-top:18px">'+(o.guardar?'<button class="btn pri" type="submit" style="flex:1">'+(o.txt||'Guardar')+'</button>':'')+(o.borrar?'<button class="btn pel" type="button" data-a="borrarHoja">'+(o.borrarTxt||'Borrar')+'</button>':'')+'</div></form>';
   $('#sheetP').innerHTML=h;$('#sheet').classList.add('on');$('#sheetP').scrollTop=0}
 function cerrarHoja(){$('#sheet').classList.remove('on');hoja=null}
 function leerHoja(){const o={},f=$('#hf');(hoja.campos||[]).forEach(c=>{const e=f.elements[c.k];o[c.k]=c.tipo==='check'?e.checked:c.tipo==='num'?pNum(e.value):e.value.trim()});return o}
@@ -746,13 +813,21 @@ document.addEventListener('submit',e=>{e.preventDefault();if(!hoja||!hoja.guarda
 /* ================= acciones ================= */
 const buscar=(a,id)=>a.find(x=>x.id===id);
 const quitar=(a,id)=>{const i=a.findIndex(x=>x.id===id);if(i>=0)a.splice(i,1)};
-function hojaSes(x){sheet({titulo:x?'Editar entreno':'Nuevo entreno',val:x||{fecha:ymd(new Date()),tipo:'Fuerza'},campos:[{k:'fecha',l:'Fecha',tipo:'date',req:1},{k:'tipo',l:'Tipo',tipo:'select',ops:(x&&!TIPOS.includes(x.tipo)?[x.tipo]:[]).concat(TIPOS).map(t=>[t,t])},{k:'min',l:'Duración (min)',tipo:'num',req:1},{k:'km',l:'Distancia (km)',tipo:'num',ph:'opcional'},{k:'kcal',l:'Calorías activas',tipo:'num',ph:'opcional'},{k:'nota',l:'Nota',ph:'opcional'}],
-  guardar:v=>{if(!v.fecha||!v.min){toast('Pon fecha y duración');return false}if(x)Object.assign(x,v);else S.act.ses.push(Object.assign({id:uid()},v))},borrar:x?()=>quitar(S.act.ses,x.id):null})}
+function hojaMeta(x){sheet({titulo:x?'Editar meta':'Nueva meta',val:x||{tipo:'',n:2,uni:'ses',per:'sem'},campos:[{k:'tipo',l:'De qué',tipo:'select',ops:[['','Cualquier entreno']].concat(tiposAct().map(t=>[t,t]))},{k:'otro',l:'O un tipo nuevo',ph:'Pádel, monte, yoga…',ay:'Se añade a tu lista de tipos de entreno.'},{k:'n',l:'Cuánto',tipo:'num',req:1},{k:'uni',l:'Medido en',tipo:'select',ops:[['ses','Entrenos'],['min','Minutos'],['km','Kilómetros']]},{k:'per',l:'Cada',tipo:'select',ops:[['sem','Semana'],['mes','Mes']]}],
+  guardar:v=>{if(!(v.n>0)){toast('Pon una cantidad');return false}if(v.otro)v.tipo=nuevoTipo(v.otro);delete v.otro;if(x)Object.assign(x,v);else S.act.metas.push(Object.assign({id:uid()},v))},borrar:x?()=>quitar(S.act.metas,x.id):null})}
+function hojaSes(x){sheet({titulo:x?'Editar entreno':'Nuevo entreno',val:x||{fecha:ymd(new Date()),tipo:'Fuerza'},campos:[{k:'fecha',l:'Fecha',tipo:'date',req:1},{k:'tipo',l:'Tipo',tipo:'select',ops:tiposAct().map(t=>[t,t])},{k:'otro',l:'O un tipo nuevo',ph:'opcional'},{k:'min',l:'Duración (min)',tipo:'num',req:1},{k:'km',l:'Distancia (km)',tipo:'num',ph:'opcional'},{k:'kcal',l:'Calorías activas',tipo:'num',ph:'opcional'},{k:'nota',l:'Nota',ph:'opcional'}],
+  guardar:v=>{if(!v.fecha||!v.min){toast('Pon fecha y duración');return false}if(v.otro)v.tipo=nuevoTipo(v.otro);delete v.otro;if(x)Object.assign(x,v);else S.act.ses.push(Object.assign({id:uid()},v))},borrar:x?()=>quitar(S.act.ses,x.id):null})}
 function hojaEv(x){sheet({titulo:x?'Editar evento':'Nuevo evento',val:x?Object.assign({},x,{dia:!x.h1}):{quien:'yo',d1:ymd(new Date()),dia:true},campos:[{k:'quien',l:'De quién',tipo:'select',ops:[['yo',S.cfg.nombre],['pareja',S.cfg.pareja]]},{k:'titulo',l:'Título',req:1,ph:'Guardia, mañana, cena…'},{k:'d1',l:'Empieza',tipo:'date',req:1},{k:'d2',l:'Termina (si dura varios días)',tipo:'date'},{k:'dia',l:'Todo el día',tipo:'check'},{k:'h1',l:'Hora de inicio',tipo:'time'},{k:'h2',l:'Hora de fin',tipo:'time'}],
   guardar:v=>{if(!v.titulo||!v.d1){toast('Pon título y fecha');return false}if(!v.d2||v.d2<v.d1)v.d2=v.d1;if(v.dia||!v.h1){v.h1=null;v.h2=null}delete v.dia;if(x)Object.assign(x,v);else S.cal.ev.push(Object.assign({id:uid(),origen:'manual'},v))},borrar:x?()=>quitar(S.cal.ev,x.id):null})}
-function hojaPos(x){sheet({titulo:x?'Editar posición':'Nueva posición',val:x||{cuenta:'ING'},campos:[{k:'cuenta',l:'Cuenta',tipo:'select',ops:[['ING','ING'],['IBKR','Interactive Brokers']]},{k:'nombre',l:'Nombre',req:1,ph:'Iberdrola, VWCE…'},{k:'ticker',l:'Ticker',ph:'IBE.MC',ay:'Servirá para la actualización diaria de precios.'},{k:'n',l:'Títulos',tipo:'num',req:1},{k:'coste',l:'Precio medio de compra (€)',tipo:'num',ph:'opcional',ay:'Lo muestra ING en el detalle de cada valor.'},{k:'precio',l:'Precio actual (€)',tipo:'num',req:1}],
-  guardar:v=>{if(!v.nombre||v.n==null||v.precio==null){toast('Faltan datos');return false}v.cuenta=v.cuenta==='IBKR'?'IBKR':'ING';v.fp=ymd(new Date());if(x)Object.assign(x,v);else S.inv.pos.push(Object.assign({id:uid()},v))},borrar:x?()=>quitar(S.inv.pos,x.id):null})}
-function hojaMov(x){sheet({titulo:x?'Editar movimiento':'Nuevo movimiento',val:x||{fecha:ymd(new Date()),tipo:'aportacion',cuenta:'IBKR'},campos:[{k:'tipo',l:'Tipo',tipo:'select',ops:[['aportacion','Aportación'],['dividendo','Dividendo cobrado'],['retirada','Retirada']]},{k:'fecha',l:'Fecha',tipo:'date',req:1},{k:'importe',l:'Importe (€)',tipo:'num',req:1},{k:'cuenta',l:'Cuenta',tipo:'select',ops:[['ING','ING'],['IBKR','Interactive Brokers']]},{k:'nota',l:'Nota',ph:'opcional'}],
+function hojaPos(x,v){v=v||x||{cuenta:S.inv.cuentas[0]||'ING',tipo:'accion'};const sal=esSaldo(v),r=x&&!sal?opsRes(x.id):null;
+  const campos=[{k:'cuenta',l:'Banco o cuenta',tipo:'select',ops:S.inv.cuentas.map(c=>[c,c])},{k:'tipo',l:'Tipo de producto',tipo:'select',ops:PROD},{k:'nombre',l:'Nombre',req:1,ph:sal?'Cuenta Naranja, depósito 12 meses…':'Iberdrola, MSCI World…'}].concat(sal?
+    [{k:'precio',l:'Saldo (€)',tipo:'num',req:1},{k:'tae',l:'Interés anual (%)',tipo:'num',ph:'opcional'}].concat(v.tipo==='deposito'?[{k:'vence',l:'Vencimiento',tipo:'date'}]:[]):
+    [{k:'ticker',l:'Símbolo para el precio diario',ph:'IBE.MC, IWDA.AS…',ay:'El que usa Yahoo Finance. Sin símbolo, el precio se cambia a mano.'},{k:'n',l:v.tipo==='accion'?'Títulos':'Títulos o participaciones',tipo:'num',req:1},
+     {k:'coste',l:'Precio medio de compra (€)',tipo:'num',ph:'opcional',ay:r&&r.n?'Calculado con '+r.n+(r.n>1?' operaciones leídas':' operación leída')+' del PDF.'+(Math.abs(r.q-x.n)>1e-6?' Esas operaciones suman '+FN.format(r.q)+' títulos y aquí hay '+FN.format(x.n)+': puede faltar historial.':''):'Se rellena solo al leer el PDF de compras y ventas.'},{k:'precio',l:'Precio actual (€)',tipo:'num',req:1}]);
+  sheet({titulo:x?'Editar producto':'Nuevo producto',val:v,campos,re:{k:'tipo',fn:nv=>hojaPos(x,Object.assign({},v,nv))},
+    guardar:n=>{if(!n.nombre||n.precio==null||(!esSaldo(n)&&n.n==null)){toast('Faltan datos');return false}if(esSaldo(n)){n.n=1;n.coste=null;n.ticker=''}else{n.tae=null;n.vence=null}n.fp=ymd(new Date());if(x)Object.assign(x,n);else S.inv.pos.push(Object.assign({id:uid()},n))},
+    borrar:x?()=>{quitar(S.inv.pos,x.id);S.inv.ops=S.inv.ops.filter(o=>o.pos!==x.id)}:null})}
+function hojaMov(x){sheet({titulo:x?'Editar movimiento':'Nuevo movimiento',val:x||{fecha:ymd(new Date()),tipo:'aportacion',cuenta:S.inv.cuentas.includes('IBKR')?'IBKR':S.inv.cuentas[0]},campos:[{k:'tipo',l:'Tipo',tipo:'select',ops:[['aportacion','Aportación'],['dividendo','Dividendo cobrado'],['retirada','Retirada']]},{k:'fecha',l:'Fecha',tipo:'date',req:1},{k:'importe',l:'Importe (€)',tipo:'num',req:1},{k:'cuenta',l:'Banco o cuenta',tipo:'select',ops:S.inv.cuentas.map(c=>[c,c])},{k:'nota',l:'Nota',ph:'opcional'}],
   guardar:v=>{if(!v.fecha||!v.importe){toast('Pon fecha e importe');return false}if(x)Object.assign(x,v);else S.inv.mov.push(Object.assign({id:uid()},v))},borrar:x?()=>quitar(S.inv.mov,x.id):null})}
 function hojaObj(x){sheet({titulo:x?'Editar propósito':'Nuevo propósito',val:x||{ambito:U.amb,tipo:'check',auto:''},campos:[{k:'nombre',l:'Propósito',req:1},{k:'ambito',l:'Periodo',tipo:'select',ops:[['dia','Diario'],['mes','Mensual'],['anio','Anual']]},{k:'tipo',l:'Cómo se mide',tipo:'select',ops:[['check','Hecho o no hecho'],['num','Una cantidad hasta una meta']]},{k:'meta',l:'Meta (solo cantidades)',tipo:'num'},{k:'unidad',l:'Unidad',ph:'€, sesiones, páginas…'},{k:'auto',l:'De dónde sale el dato',tipo:'select',ops:[['','Lo apunto yo'],['sesiones','Entrenos apuntados en Actividad'],['aportaciones','Aportaciones apuntadas en Inversión']]}],
   guardar:v=>{if(!v.nombre){toast('Pon un nombre');return false}if(v.auto)v.tipo='num';if(v.tipo==='num'&&!v.meta){toast('Pon una meta');return false}v.auto=v.auto||null;v.ej=0;if(x)Object.assign(x,v);else S.obj.items.push(Object.assign({id:uid()},v))},borrar:x?()=>{quitar(S.obj.items,x.id)}:null})}
@@ -763,14 +838,54 @@ function elegirArchivo(acc,fn,bin){const i=document.createElement('input');i.typ
 const TICK={'ACERINOX':'ACX.MC','AENA':'AENA.MC','AMADEUS':'AMS.MC','B.SABADELL':'SAB.MC','BANKINTER':'BKT.MC','BBVA':'BBVA.MC','CAIXABANK':'CABK.MC','ENAGAS':'ENG.MC','ENDESA':'ELE.MC','GRIFOLS':'GRF.MC','IBERDROLA':'IBE.MC','INDITEX':'ITX.MC','INDRA A':'IDR.MC','INM.COLONIAL':'COL.MC','MAPFRE':'MAP.MC','MERLIN PROP.':'MRL.MC','NATURGY':'NTGY.MC','REDEIA':'RED.MC','REPSOL':'REP.MC','SANTANDER':'SAN.MC','TELEFONICA':'TEF.MC','VIDRALA':'VID.MC'};
 const RE_ING=/^(.+?)\s+(\d[\d.]*)\s+(\d[\d.]*,\d+)\s*€\s+(\d[\d.]*,\d{2})\s*€\s+\d[\d.,]*\s*%\s+(\d{2})\/(\d{2})\/(\d{4})$/;
 function filasIng(lineas){const out=[];lineas.forEach(l=>{const m=l.replace(/\s+/g,' ').trim().match(RE_ING);if(!m)return;const n=pNum(m[2]),val=pNum(m[4]);if(!n||!val)return;out.push({nombre:m[1].trim().toUpperCase(),n,valor:val,precio:val/n,fecha:m[7]+'-'+m[6]+'-'+m[5]})});return out}
-async function leerPdfIng(buf){const pdfjs=await import('./pdf.min.js');pdfjs.GlobalWorkerOptions.workerSrc='./pdf.worker.min.js';const doc=await pdfjs.getDocument({data:new Uint8Array(buf)}).promise,L=[];
+async function pdfLineas(buf){const pdfjs=await import('./pdf.min.js');pdfjs.GlobalWorkerOptions.workerSrc='./pdf.worker.min.js';const doc=await pdfjs.getDocument({data:new Uint8Array(buf)}).promise,L=[];
   for(let i=1;i<=doc.numPages;i++){const tc=await (await doc.getPage(i)).getTextContent(),its=tc.items.filter(t=>t.str&&t.str.trim()).sort((a,b)=>b.transform[5]-a.transform[5]||a.transform[4]-b.transform[4]);let cur=[],y=null;
     const cierra=()=>{if(cur.length)L.push(cur.sort((a,b)=>a.transform[4]-b.transform[4]).map(t=>t.str.trim()).join(' '));cur=[]};
     its.forEach(t=>{if(y!==null&&Math.abs(t.transform[5]-y)>3)cierra();y=t.transform[5];cur.push(t)});cierra()}
-  return filasIng(L)}
-function proponerIng(filas){const act=S.inv.pos.filter(p=>p.cuenta==='ING'),nom=p=>(p.ing||p.nombre).toUpperCase(),nuevos=filas.filter(f=>!act.some(p=>nom(p)===f.nombre)),fuera=act.filter(p=>!filas.some(f=>f.nombre===nom(p))),tot=filas.reduce((a,f)=>a+f.valor,0);
-  sheet({titulo:'Cartera de ING',intro:filas.length+' valores por '+eur(tot)+'. Se actualizan '+(filas.length-nuevos.length)+' y se añaden '+nuevos.length+(fuera.length?'. Se quitan '+fuera.length+' que ya no están en el PDF: '+esc(fuera.map(p=>p.nombre).join(', ')):'')+'. Los precios de compra que hayas apuntado se conservan.',txt:'Cargar cartera',
-    guardar:()=>{S.inv.pos=S.inv.pos.filter(p=>!fuera.includes(p));filas.forEach(f=>{const p=act.find(x=>nom(x)===f.nombre);if(p){p.n=f.n;p.precio=f.precio;p.fp=f.fecha}else S.inv.pos.push({id:uid(),cuenta:'ING',nombre:f.nombre,ing:f.nombre,ticker:TICK[f.nombre]||'',n:f.n,coste:null,precio:f.precio,fp:f.fecha})})}})}
+  return L}
+async function leerPdfIng(buf){return filasIng(await pdfLineas(buf))}
+/* lector de operaciones de compra y venta */
+const nNom=t=>String(t||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Z0-9]+/g,' ').trim();
+const GEN=['BANCO','GRUPO','INMOBILIARIA','INTERNACIONAL','INTERNATIONAL','HOLDING','HOLDINGS','ESPANA','ACCIONES','FONDO','CLASE','SOCIMI','PROPERTIES','ENERGIA','GLOBAL','WORLD','INDEX','MARKETS','EMERGING'];
+function parecido(a,b){a=nNom(a);b=nNom(b);if(!a||!b)return 0;if(a===b)return 99;const B=b.split(' ');let n=0;a.split(' ').forEach(t=>{if(t.length>=5&&!GEN.includes(t)&&B.includes(t))n++});if(!n&&a.length>=4&&b.length>=4&&(a.includes(b)||b.includes(a)))n=1;return n}
+const RE_CO=/^(compras?|suscripci[oó]n(es)?|adquisici[oó]n(es)?|buy|bought)$/i,RE_VE=/^(ventas?|reembolsos?|enajenaci[oó]n(es)?|sell|sold)$/i,RE_NUM=/^-?(\d{1,3}(\.\d{3})+|\d+)(,\d+)?$/,
+  RE_PRE=/^(de|del|la|el|en|a|y)$/i,RE_RU=/^(valores?|acciones|eur|euros?|t[ií]tulos|participaciones|mercado|continuo|contado|operaci[oó]n|orden|ejecutada|bolsa|madrid|precio|importe|efectivo|comisi[oó]n|fecha|tipo|total|bruto|neto|l[ií]mite|[a-z]{2}[a-z0-9]{9}\d)$/i;
+function opsDeLineas(L){const out=[];let ctxN='',ctxF=null,mal=0;
+  L.forEach(raw=>{const fs=[];let l=String(raw).replace(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4}|\d{2})\b/g,(m,d,mo,y)=>{y=+y<100?2000+ +y:+y;if(+mo>=1&&+mo<=12&&+d>=1&&+d<=31){fs.push(y+'-'+pad(+mo)+'-'+pad(+d));return ' '}return m}).replace(/\b\d{1,2}:\d{2}(:\d{2})?\b/g,' ');
+    let co=false,ve=false;const nums=[],txt=[];
+    l.split(/[\s|;]+/).forEach(k=>{if(!k)return;if(/%$/.test(k))return;const k0=k.replace(/(€|EUR)$/i,'').replace(/^[(:]+|[):,.]+$/g,'');if(!k0)return;
+      if(RE_NUM.test(k0)){nums.push({t:k0,v:pNum(k0)});return}if(RE_CO.test(k0)){co=true;return}if(RE_VE.test(k0)){ve=true;return}if(/^compra\/venta$/i.test(k0)){co=ve=true;return}if(!RE_RU.test(k0)&&/[a-záéíóúñ]/i.test(k0))txt.push(k0)});
+    while(txt.length&&RE_PRE.test(txt[0]))txt.shift();while(txt.length&&RE_PRE.test(txt[txt.length-1]))txt.pop();
+    const nombre=txt.join(' ').replace(/\s+/g,' ').trim();
+    if(co===ve){if(!nums.length&&!fs.length&&nombre.length>=3&&nombre.length<=45&&!co)ctxN=nombre;if(fs.length&&!nums.length&&!nombre)ctxF=fs[0];return}
+    let q=null,pr=null,dud=false,best=null;
+    for(let i=0;i<nums.length;i++)for(let j=i+1;j<nums.length;j++)for(let k=0;k<nums.length;k++){if(k===i||k===j)continue;const a=nums[i].v,b=nums[j].v,c=nums[k].v;if(!(a>0&&b>0&&c>0))continue;const e=Math.abs(a*b-c)/c;if(e<0.03&&(!best||e<best.e-1e-9))best={e,i,j}}
+    if(best){const a=nums[best.i],b=nums[best.j],ea=!a.t.includes(','),eb=!b.t.includes(',');if(eb&&!ea){q=b.v;pr=a.v}else{q=a.v;pr=b.v}}
+    else if(nums.length===2&&!nums[0].t.includes(',')&&nums[0].v>0&&nums[1].v>0){q=nums[0].v;pr=nums[1].v;dud=true}
+    else{mal++;return}
+    out.push({f:fs[0]||ctxF||null,t:co?'c':'v',nombre:nombre||ctxN||'Sin nombre',q,p:pr,dud})});
+  return {ops:out,mal}}
+const r4=n=>Math.round(n*10000)/10000;
+function opsCalc(L){L=L.map((o,i)=>({o,i})).sort((a,b)=>{const x=a.o.f||'',y=b.o.f||'';return x<y?-1:x>y?1:a.o.t===b.o.t?a.i-b.i:a.o.t==='c'?-1:1}).map(x=>x.o);let q=0,c=0,ult=null;
+  L.forEach(o=>{ult=o.p;if(o.t==='c'){c=(q*c+o.q*o.p)/(q+o.q);q+=o.q}else{q-=o.q;if(q<=1e-9){q=0;c=0}}});return {q:r4(q),coste:c,n:L.length,ult}}
+const opsRes=pid=>opsCalc(S.inv.ops.filter(o=>o.pos===pid));
+function addOps(pid,ops){const key=o=>[o.f||'',o.t,r4(o.q),r4(o.p)].join('|'),have={},seen={};S.inv.ops.forEach(o=>{if(o.pos===pid){const k=key(o);have[k]=(have[k]||0)+1}});let n=0;
+  ops.forEach(o=>{const k=key(o);seen[k]=(seen[k]||0)+1;if(seen[k]>(have[k]||0)){S.inv.ops.push({pos:pid,f:o.f||null,t:o.t,q:o.q,p:o.p});n++}});return n}
+function proponerOps(res){const G={};res.ops.forEach(o=>{const k=nNom(o.nombre);(G[k]=G[k]||{k,nombre:o.nombre,ops:[]}).ops.push(o)});const gr=Object.values(G),cand=S.inv.pos.filter(p=>!esSaldo(p)),val={cuenta:S.inv.cuentas[0],tipoN:'accion'};
+  const campos=gr.map((g,i)=>{let best=null,bs=0,emp=false;cand.forEach(p=>{const sc=Math.max(parecido(g.nombre,p.ing||''),parecido(g.nombre,p.nombre));if(sc>bs){bs=sc;best=p;emp=false}else if(sc&&sc===bs)emp=true});
+    const r=opsCalc(g.ops),nc=g.ops.filter(o=>o.t==='c').length,nv=g.ops.length-nc;val['g'+i]=best&&!emp?best.id:r.q>0?'nuevo':'no';
+    return {k:'g'+i,l:esc(g.nombre)+' · '+nc+(nc===1?' compra':' compras')+(nv?', '+nv+(nv===1?' venta':' ventas'):''),tipo:'select',ops:[['nuevo','Añadir como producto nuevo'],['no','No usar']].concat(cand.map(p=>[p.id,p.nombre+' · '+p.cuenta])),ay:r.q>0?'Quedan '+FN.format(r.q)+' a '+eur(r.coste)+' de media.':'Según este PDF, vendido entero.'}});
+  const mer=PROD.filter(x=>!esSaldo({tipo:x[0]}));
+  sheet({titulo:'Compras y ventas',intro:res.ops.length+(res.ops.length===1?' operación leída':' operaciones leídas')+' de '+gr.length+(gr.length===1?' valor':' valores')+'.'+(res.mal?' '+res.mal+' líneas con compra o venta no se han entendido y no se usan.':'')+(res.ops.some(o=>o.dud)?' En alguna no aparece el importe: revisa el resultado.':'')+' Comprueba a qué producto va cada valor.',val,txt:'Aplicar',
+    campos:campos.concat([{k:'cuenta',l:'Banco de los productos nuevos',tipo:'select',ops:S.inv.cuentas.map(c=>[c,c])},{k:'tipoN',l:'Tipo de los productos nuevos',tipo:'select',ops:mer}]),
+    guardar:v=>{let nu=0,ac=0,des=0;gr.forEach((g,i)=>{const d=v['g'+i];if(!d||d==='no')return;let p=d==='nuevo'?null:buscar(S.inv.pos,d),sigue=false;
+        if(p){const a=opsRes(p.id);sigue=a.n>0&&Math.abs(a.q-p.n)<1e-6}
+        else{const r=opsCalc(g.ops);if(!(r.q>0))return;const tk=Object.keys(TICK).find(K=>parecido(K,g.nombre));p={id:uid(),cuenta:v.cuenta,tipo:v.tipoN,nombre:g.nombre,ticker:tk?TICK[tk]:'',n:r.q,coste:null,precio:r.ult,fp:ymd(new Date())};S.inv.pos.push(p);nu++;sigue=true}
+        addOps(p.id,g.ops);const r=opsRes(p.id);if(r.q>0&&r.coste>0)p.coste=r4(r.coste);if(sigue&&r.q>0)p.n=r.q;if(Math.abs(r.q-p.n)>1e-6)des++;ac++});
+      toast('Precio de compra puesto en '+ac+(ac===1?' producto':' productos')+(nu?'; '+nu+(nu===1?' nuevo':' nuevos'):'')+'.'+(des?' En '+des+' no cuadran los títulos: mira su ficha.':''))}})}
+function proponerIng(filas){const act=S.inv.pos.filter(p=>p.cuenta==='ING'&&p.tipo==='accion'),nom=p=>(p.ing||p.nombre).toUpperCase(),nuevos=filas.filter(f=>!act.some(p=>nom(p)===f.nombre)),fuera=act.filter(p=>!filas.some(f=>f.nombre===nom(p))),tot=filas.reduce((a,f)=>a+f.valor,0);
+  sheet({titulo:'Cartera de ING',intro:filas.length+' valores por '+eur(tot)+'. Se actualizan '+(filas.length-nuevos.length)+' y se añaden '+nuevos.length+(fuera.length?'. Se quitan '+fuera.length+' acciones de ING que ya no están en el PDF: '+esc(fuera.map(p=>p.nombre).join(', ')):'')+'. Los precios de compra que hayas apuntado se conservan.',txt:'Cargar cartera',
+    guardar:()=>{if(!S.inv.cuentas.includes('ING'))S.inv.cuentas.unshift('ING');S.inv.pos=S.inv.pos.filter(p=>!fuera.includes(p));S.inv.ops=S.inv.ops.filter(o=>!fuera.some(p=>p.id===o.pos));filas.forEach(f=>{const p=act.find(x=>nom(x)===f.nombre);if(p){p.n=f.n;p.precio=f.precio;p.fp=f.fecha}else S.inv.pos.push({id:uid(),cuenta:'ING',tipo:'accion',nombre:f.nombre,ing:f.nombre,ticker:TICK[f.nombre]||'',n:f.n,coste:null,precio:f.precio,fp:f.fecha})})}})}
 function exportar(){const txt=JSON.stringify(S),nombre='panel-alex-'+ymd(new Date())+'.json';try{const f=new File([txt],nombre,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(()=>{});return}}catch(e){}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=nombre;document.body.appendChild(a);a.click();a.remove()}
 const h32=s=>{let h=2166136261;for(let k=0;k<2000;k++){for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}h^=k}return (h>>>0).toString(16)};
@@ -778,7 +893,7 @@ const A={
   tab:e=>{if(U.swipe&&Date.now()-U.swipe<600&&e.closest('.semw'))return;U.tab=e.dataset.t;if(U.tab==='agenda')U.sem=addD(lunes(hoy()),7*(+e.dataset.w||0));if(U.tab==='inicio')U.semI=0;render();window.scrollTo(0,0)},
   semI:e=>{const n=+e.dataset.n;if(n===(U.semI||0))return;U.semI=n;pintaSem(n?1:-1)},
   priv:()=>{S.cfg.priv=!S.cfg.priv;guardar();render()},
-  cerrarHoja,borrarHoja:e=>{if(e.dataset.ok){hoja.borrar();cerrarHoja();cambio()}else{e.dataset.ok=1;e.textContent='Pulsa otra vez para borrar'}},
+  cerrarHoja,borrarHoja:e=>{if(e.dataset.ok){const f=hoja.borrar;cerrarHoja();conDeshacer(f)}else{e.dataset.ok=1;e.textContent='Pulsa otra vez para borrar'}},
   sem:e=>{const n=+e.dataset.n;U.sem=n?addD(U.sem,7*n):lunes(hoy());render()},
   perro:e=>{const k=e.dataset.k,P=S.cal.perro=S.cal.perro||{};if(P[k])delete P[k];else P[k]=1;const lim=ymd(addD(hoy(),-90));Object.keys(P).forEach(x=>{if(x<lim)delete P[x]});cambio()},
   evNuevo:()=>hojaEv(),evEdit:e=>{const x=buscar(S.cal.ev,e.dataset.id);if(!x)return;if(x.origen!=='ics'){hojaEv(x);return}U.evSel=x;const d=pYmd(x.d1);
@@ -795,22 +910,41 @@ const A={
     sheet({titulo:'Cerrar '+MES[m].toLowerCase(),intro:p.length?'Quedan '+p.length+' importes sin apuntar. Al cerrar se guardan como 0:<br>'+esc(p.join(', '))+'.':'Todo apuntado. El mes pasará a contar en tus medias.',txt:'Cerrar mes',guardar:()=>{Y.grupos.forEach(g=>g.filas.forEach(r=>{if(gAct(g,m)&&r.v[m]===null)r.v[m]=0}));if(Y.variables[m]===null)Y.variables[m]=0;Y.cerrados[m]=1}})},
   filaNueva:e=>{const g=buscar(ecoY(U.ecoY).grupos,e.dataset.g);sheet({titulo:'Nuevo concepto en '+g.nombre,campos:[{k:'nombre',l:'Concepto',req:1}],guardar:v=>{if(!v.nombre)return false;g.filas.push({id:uid(),nombre:v.nombre,v:Array(12).fill(null)})}})},
   filaEdit:e=>{const g=buscar(ecoY(U.ecoY).grupos,e.dataset.g),r=buscar(g.filas,e.dataset.r);sheet({titulo:'Concepto',val:r,intro:'Borrarlo elimina sus importes de todo '+U.ecoY+'.',campos:[{k:'nombre',l:'Nombre',req:1}],guardar:v=>{if(!v.nombre)return false;r.nombre=v.nombre},borrar:()=>quitar(g.filas,r.id)})},
-  grpNuevo:()=>sheet({titulo:'Nueva vivienda o grupo',campos:[{k:'nombre',l:'Nombre',req:1}],guardar:v=>{if(!v.nombre)return false;ecoY(U.ecoY).grupos.push({id:uid(),nombre:v.nombre,hasta:null,filas:[]})}}),
-  grpEdit:e=>{const Y=ecoY(U.ecoY),g=buscar(Y.grupos,e.dataset.g);sheet({titulo:'Grupo',val:{nombre:g.nombre,hasta:g.hasta||''},campos:[{k:'nombre',l:'Nombre',req:1},{k:'hasta',l:'Último mes con gastos en '+U.ecoY,tipo:'select',ops:[['','Sigue activo']].concat(MES.map((n,i)=>[i+1,n]))}],guardar:v=>{if(!v.nombre)return false;g.nombre=v.nombre;g.hasta=v.hasta?+v.hasta:null},borrar:()=>quitar(Y.grupos,g.id)})},
+  grpNuevo:()=>{const m=U.ecoM;sheet({titulo:'Nueva vivienda o grupo',val:{desde:m},campos:[{k:'nombre',l:'Nombre',req:1}].concat(m?[{k:'desde',l:'Cuenta desde',tipo:'select',ops:[[m,MES[m]+' en adelante'],[0,'Todo '+U.ecoY]]}]:[]),
+    extra:'<div class="btns"><button type="button" class="btn s" data-a="grpRecupera">Recuperar uno borrado desde una copia</button></div>',
+    guardar:v=>{if(!v.nombre)return false;const off={};for(let i=0;i<(+v.desde||0);i++)off[i]=1;ecoY(U.ecoY).grupos.push({id:uid(),nombre:v.nombre,off,filas:[]})}})},
+  grpRecupera:()=>elegirArchivo('.json,application/json',t=>{try{const d=JSON.parse(t),src=d.eco.years[U.ecoY];if(!src)throw 0;const Y=ecoY(U.ecoY,true),fal=src.grupos.filter(g=>!Y.grupos.some(x=>nTit(x.nombre)===nTit(g.nombre)));
+      if(!fal.length){toast('Esa copia no tiene grupos de '+U.ecoY+' que falten aquí');return}
+      fal.forEach(g=>{const off=Object.assign({},g.off);if(g.hasta)for(let m=g.hasta;m<12;m++)off[m]=1;Y.grupos.push({id:uid(),nombre:g.nombre,off,filas:g.filas.map(r=>({id:uid(),nombre:r.nombre,v:Array.from({length:12},(_,i)=>r.v[i]??null)}))})});
+      cerrarHoja();cambio();toast('Recuperado: '+fal.map(g=>g.nombre).join(', '))}catch(e){toast('Ese archivo no es una copia de esta app')}}),
+  grpEdit:e=>{const Y=ecoY(U.ecoY),g=buscar(Y.grupos,e.dataset.g),m=U.ecoM,on=gAct(g,m),mes=MES[m].toLowerCase(),b=(v,t)=>'<button type="button" class="btn s" data-a="grpMes" data-g="'+g.id+'" data-v="'+v+'">'+t+'</button>';
+    sheet({titulo:g.nombre,val:{nombre:g.nombre},intro:(on?'Ahora cuenta en '+mes+'.':'Ahora no cuenta en '+mes+'.')+' Quitarlo de un mes no borra sus importes: se puede volver a poner cuando quieras.',campos:[{k:'nombre',l:'Nombre',req:1}],
+      extra:'<div class="btns" style="flex-direction:column;align-items:stretch">'+(on?b('off1','Quitar solo de '+mes)+(m<11?b('offN','Quitar desde '+mes+' hasta diciembre'):''):b('on1','Volver a poner en '+mes)+(m<11?b('onN','Volver a poner desde '+mes+' hasta diciembre'):''))+(Object.keys(g.off||{}).length?b('all','Poner en los 12 meses'):'')+'</div>',
+      guardar:v=>{if(!v.nombre)return false;g.nombre=v.nombre},borrar:()=>quitar(Y.grupos,g.id),borrarTxt:'Borrar de todo '+U.ecoY})},
+  grpMes:e=>{const g=buscar(ecoY(U.ecoY).grupos,e.dataset.g),m=U.ecoM,v=e.dataset.v;if(!g)return;g.off=g.off||{};
+    if(v==='all')g.off={};else for(let i=m;i<=(/N$/.test(v)?11:m);i++){if(v[1]==='f')g.off[i]=1;else delete g.off[i]}
+    cerrarHoja();cambio();toast(v==='all'?g.nombre+' cuenta todo el año':g.nombre+(v[1]==='f'?' quitado ':' puesto ')+(/N$/.test(v)?'desde '+MES[m].toLowerCase():'en '+MES[m].toLowerCase()))},
+  grpOn:e=>{const g=buscar(ecoY(U.ecoY).grupos,e.dataset.g);if(g&&g.off)delete g.off[U.ecoM];cambio()},
   fijoNuevo:()=>hojaFijo(),fijoEdit:e=>hojaFijo(buscar(S.eco.fijos,e.dataset.id)),
   pdfIng:()=>elegirArchivo('.pdf,application/pdf',async buf=>{toast('Leyendo PDF…');let filas;try{filas=await leerPdfIng(buf)}catch(e){console.log('PDFERR',String(e));toast('Este dispositivo no ha podido abrir el PDF. Funciona en la app publicada.');return}if(!filas.length){toast('No encuentro la tabla de acciones de ING en ese PDF');return}proponerIng(filas)},true),
+  pdfOps:()=>elegirArchivo('.pdf,application/pdf',async buf=>{toast('Leyendo PDF…');let L;try{L=await pdfLineas(buf)}catch(e){console.log('PDFERR',String(e));toast('Este dispositivo no ha podido abrir el PDF. Funciona en la app publicada.');return}const r=opsDeLineas(L);if(!r.ops.length){toast(r.mal?'Veo '+r.mal+' líneas de compra o venta, pero no entiendo sus cifras':'No encuentro compras ni ventas en ese PDF');return}proponerOps(r)},true),
+  cuentas:()=>{const C=S.inv.cuentas,val={};C.forEach((c,i)=>val['c'+i]=c);sheet({titulo:'Bancos y cuentas',intro:'Cambia un nombre para renombrarlo. Déjalo vacío para quitarlo: solo se quitan los que no tienen productos.',val,campos:C.map((c,i)=>({k:'c'+i,l:'Banco '+(i+1)})).concat([{k:'nueva',l:'Añadir otro',ph:'MyInvestor, Trade Republic, BBVA…'}]),
+    guardar:v=>{const out=[];let av=false;C.forEach((c,i)=>{let n=(v['c'+i]||'').trim();if(!n){if(S.inv.pos.some(p=>p.cuenta===c)){av=true;n=c}else return}
+        if(n!==c){S.inv.pos.forEach(p=>{if(p.cuenta===c)p.cuenta=n});S.inv.mov.forEach(m=>{if(m.cuenta===c)m.cuenta=n})}if(!out.includes(n))out.push(n)});
+      const nv=(v.nueva||'').trim();if(nv&&!out.includes(nv))out.push(nv);if(!out.length)out.push('ING');S.inv.cuentas=out;if(av)toast('No se quita un banco que tiene productos');else if(nv)toast(nv+' añadido. Ya puedes elegirlo al crear un producto.')}})},
   posNueva:()=>hojaPos(),posEdit:e=>hojaPos(buscar(S.inv.pos,e.dataset.id)),
-  precios:()=>sheet({titulo:'Actualizar precios',intro:'Precio actual de cada título, en euros.',campos:S.inv.pos.map(p=>({k:p.id,l:esc(p.nombre),tipo:'num',def:p.precio})),guardar:v=>{S.inv.pos.forEach(p=>{if(v[p.id]!=null){p.precio=v[p.id];p.fp=ymd(new Date())}})}}),
+  precios:()=>sheet({titulo:'Actualizar precios',intro:'Precio actual de cada título o saldo de cada cuenta, en euros.',campos:S.inv.pos.map(p=>({k:p.id,l:esc(p.nombre)+(esSaldo(p)?' (saldo)':''),tipo:'num',def:p.precio})),guardar:v=>{S.inv.pos.forEach(p=>{if(v[p.id]!=null){p.precio=v[p.id];p.fp=ymd(new Date())}})}}),
   movNuevo:()=>hojaMov(),movEdit:e=>hojaMov(buscar(S.inv.mov,e.dataset.id)),
   objInv:()=>sheet({titulo:'Objetivo de inversión',val:{objInv:S.cfg.objInv||'',aportMes:S.cfg.aportMes||'',rent:S.cfg.rent},campos:[{k:'objInv',l:'Cifra objetivo (€)',tipo:'num'},{k:'aportMes',l:'Aportación mensual (€)',tipo:'num'},{k:'rent',l:'Rentabilidad anual esperada (%)',tipo:'num',ay:'Usa rentabilidad real (descontada la inflación) para ver el objetivo en euros de hoy.'}],guardar:v=>{S.cfg.objInv=v.objInv||0;S.cfg.aportMes=v.aportMes||0;S.cfg.rent=v.rent==null?7:v.rent}}),
+  metaNueva:()=>hojaMeta(),metaEdit:e=>hojaMeta(buscar(S.act.metas,e.dataset.id)),
   sesNueva:()=>hojaSes(),sesEdit:e=>hojaSes(buscar(S.act.ses,e.dataset.id)),
   amb:e=>{U.amb=e.dataset.v;render()},objNuevo:()=>hojaObj(),objEdit:e=>hojaObj(buscar(S.obj.items,e.dataset.id)),
   objTic:e=>{const o=buscar(S.obj.items,e.dataset.id),k=o.id+'|'+perKey(o.ambito);if(o.auto)return;const on=(S.obj.reg[k]||0)>=(o.tipo==='num'?o.meta||1:1);if(on)delete S.obj.reg[k];else S.obj.reg[k]=o.tipo==='num'?o.meta||1:1;cambio()},
   objPaso:e=>{const o=buscar(S.obj.items,e.dataset.id),k=o.id+'|'+perKey(o.ambito);S.obj.reg[k]=Math.max(0,(S.obj.reg[k]||0)+(+e.dataset.n));cambio()},
-  objBorraEj:e=>{if(!e.dataset.ok){e.dataset.ok=1;e.textContent='Pulsa otra vez para quitarlos';return}S.obj.items=S.obj.items.filter(o=>!o.ej);cambio()},
-  ajustes:()=>sheet({titulo:'Ajustes',val:Object.assign({},S.cfg,{pin:''}),campos:[{k:'nombre',l:'Tu nombre'},{k:'pareja',l:'Nombre de tu pareja'},{k:'split',l:'Tu parte de los gastos comunes (%)',tipo:'num'},{k:'metaSes',l:'Entrenos por semana (meta)',tipo:'num'},{k:'libres',l:'Palabras que cuentan como día libre',ay:'Separadas por comas. Las de una o dos letras (como L) deben coincidir con el título entero; las demás basta con que aparezcan.'},{k:'ocultar',l:'Eventos que se ocultan solos',ay:'Títulos exactos separados por comas. No importan mayúsculas, tildes ni espacios.'},{k:'tema',l:'Aspecto',tipo:'select',ops:[['auto','Como el dispositivo'],['claro','Claro'],['oscuro','Oscuro']]},{k:'pin',l:S.cfg.pin?'Cambiar PIN (vacío = mantener)':'PIN de entrada (opcional)',tipo:'password',ay:'Oculta la app al abrirla. No cifra los datos guardados.'}],
+  objBorraEj:e=>{if(!e.dataset.ok){e.dataset.ok=1;e.textContent='Pulsa otra vez para quitarlos';return}conDeshacer(()=>{S.obj.items=S.obj.items.filter(o=>!o.ej)},'Ejemplos quitados.')},
+  ajustes:()=>sheet({titulo:'Ajustes',val:Object.assign({},S.cfg,{pin:''}),campos:[{k:'nombre',l:'Tu nombre'},{k:'pareja',l:'Nombre de tu pareja'},{k:'split',l:'Tu parte de los gastos comunes (%)',tipo:'num'},{k:'libres',l:'Palabras que cuentan como día libre',ay:'Separadas por comas. Las de una o dos letras (como L) deben coincidir con el título entero; las demás basta con que aparezcan.'},{k:'ocultar',l:'Eventos que se ocultan solos',ay:'Títulos exactos separados por comas. No importan mayúsculas, tildes ni espacios.'},{k:'tema',l:'Aspecto',tipo:'select',ops:[['auto','Como el dispositivo'],['claro','Claro'],['oscuro','Oscuro']]},{k:'pin',l:S.cfg.pin?'Cambiar PIN (vacío = mantener)':'PIN de entrada (opcional)',tipo:'password',ay:'Oculta la app al abrirla. No cifra los datos guardados.'}],
     extra:'<div class="btns"><button type="button" class="btn s" data-a="exportar">Guardar copia</button><button type="button" class="btn s" data-a="importar">Restaurar copia</button>'+(S.cfg.pin?'<button type="button" class="btn s" data-a="quitarPin">Quitar PIN</button>':'')+'</div>'+SY.block()+SY.autoBlock(),
-    guardar:v=>{const pin=v.pin;delete v.pin;v.split=v.split==null?50:Math.max(0,Math.min(100,v.split));v.metaSes=Math.max(1,Math.round(v.metaSes||4));v.nombre=v.nombre||'Álex';v.pareja=v.pareja||'Pareja';Object.assign(S.cfg,v);if(pin)S.cfg.pin=h32(pin)}}),
+    guardar:v=>{const pin=v.pin;delete v.pin;v.split=v.split==null?50:Math.max(0,Math.min(100,v.split));v.nombre=v.nombre||'Álex';v.pareja=v.pareja||'Pareja';Object.assign(S.cfg,v);if(pin)S.cfg.pin=h32(pin)}}),
   syncSetup:()=>{const c=SY.cfg()||{},at='autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off"';
     sheet({titulo:'Conectar con GitHub',intro:'Pon los mismos cuatro datos que usas en Nómina. Así esta app lee lo que cobras y guarda sus datos cifrados en ese mismo repositorio privado. Si olvidas la contraseña, la copia de GitHub no se puede leer.',
     val:{user:c.user||'',repo:c.repo||'nomina-datos',token:c.token||'',pass:c.pass||'',pass2:c.pass||''},campos:[{k:'user',l:'Usuario de GitHub',at},{k:'repo',l:'Repositorio privado',at},{k:'token',l:'Clave de acceso (token)',tipo:'password',at},{k:'pass',l:'Contraseña de cifrado',tipo:'password',at:'autocomplete="new-password"'},{k:'pass2',l:'Repite la contraseña',tipo:'password',at:'autocomplete="new-password"'}],txt:'Guardar y sincronizar',
@@ -841,6 +975,7 @@ const A={
 };
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el){if(el.tagName==='A')e.preventDefault();const f=A[el.dataset.a];if(f)f(el,e);return}if(e.target.id==='sheet')cerrarHoja()});
 document.addEventListener('change',e=>{const el=e.target;
+  if(hoja&&hoja.re&&el.name===hoja.re.k&&el.closest('#hf')){hoja.re.fn(leerHoja());return}
   if(el.dataset.eco){const Y=ecoY(U.ecoY),m=U.ecoM,n=pNum(el.value),k=el.dataset.eco.split(':');
     if(k[0]==='var')Y.variables[m]=n;else if(k[0]==='ing')Y.ingresos[m]=n;else{const g=buscar(Y.grupos,k[1]),r=g&&buscar(g.filas,k[2]);if(r)r.v[m]=n}
     el.value=fIn(n);guardar();ecoBind()}
@@ -858,7 +993,7 @@ if(S.cfg.pin)$('#lock').classList.add('on');
 snap();guardar(true);render();SY.init();
 refrescaCal();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refrescaCal()});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
-window.__P={importaApple,pFecha,libresRe,SY,ingreso,filasIng,get S(){return S},ecoY,comun,miMes,medias,fijosMes,parseICS,twr,invTot,pNum,mesesHasta,racha,gTot};
+window.__P={opsDeLineas,opsCalc,proponerOps,pdfLineas,resumen,metaVal,importaApple,pFecha,libresRe,SY,ingreso,filasIng,get S(){return S},ecoY,comun,miMes,medias,fijosMes,parseICS,twr,invTot,pNum,mesesHasta,racha,gTot};
 </script>
 </body>
 </html>
