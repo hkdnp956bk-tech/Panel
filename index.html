@@ -823,7 +823,7 @@ function hojaPos(x,v){v=v||x||{cuenta:S.inv.cuentas[0]||'ING',tipo:'accion'};con
   const campos=[{k:'cuenta',l:'Banco o cuenta',tipo:'select',ops:S.inv.cuentas.map(c=>[c,c])},{k:'tipo',l:'Tipo de producto',tipo:'select',ops:PROD},{k:'nombre',l:'Nombre',req:1,ph:sal?'Cuenta Naranja, depósito 12 meses…':'Iberdrola, MSCI World…'}].concat(sal?
     [{k:'precio',l:'Saldo (€)',tipo:'num',req:1},{k:'tae',l:'Interés anual (%)',tipo:'num',ph:'opcional'}].concat(v.tipo==='deposito'?[{k:'vence',l:'Vencimiento',tipo:'date'}]:[]):
     [{k:'ticker',l:'Símbolo para el precio diario',ph:'IBE.MC, IWDA.AS…',ay:'El que usa Yahoo Finance. Sin símbolo, el precio se cambia a mano.'},{k:'n',l:v.tipo==='accion'?'Títulos':'Títulos o participaciones',tipo:'num',req:1},
-     {k:'coste',l:'Precio medio de compra (€)',tipo:'num',ph:'opcional',ay:r&&r.n?'Calculado con '+r.n+(r.n>1?' operaciones leídas':' operación leída')+' del PDF.'+(Math.abs(r.q-x.n)>1e-6?' Esas operaciones suman '+FN.format(r.q)+' títulos y aquí hay '+FN.format(x.n)+': puede faltar historial.':''):'Se rellena solo al leer el PDF de compras y ventas.'},{k:'precio',l:'Precio actual (€)',tipo:'num',req:1}]);
+     {k:'coste',l:'Precio medio de compra (€)',tipo:'num',ph:'opcional',ay:r&&r.n?'Calculado con '+r.n+(r.n>1?' operaciones leídas':' operación leída')+' del PDF.'+(x.n>r.q+1e-6?' Las compras suman '+FN.format(r.q)+' títulos y tienes '+FN.format(x.n)+' (acciones gratis o desdoblamiento): lo invertido se reparte entre todos.':r.q>x.n+1e-6?' Las compras suman '+FN.format(r.q)+' títulos y aquí hay '+FN.format(x.n)+': puede faltar alguna venta.':''):'Se rellena solo al leer el PDF de compras y ventas.'},{k:'precio',l:'Precio actual (€)',tipo:'num',req:1}]);
   sheet({titulo:x?'Editar producto':'Nuevo producto',val:v,campos,re:{k:'tipo',fn:nv=>hojaPos(x,Object.assign({},v,nv))},
     guardar:n=>{if(!n.nombre||n.precio==null||(!esSaldo(n)&&n.n==null)){toast('Faltan datos');return false}if(esSaldo(n)){n.n=1;n.coste=null;n.ticker=''}else{n.tae=null;n.vence=null}n.fp=ymd(new Date());if(x)Object.assign(x,n);else S.inv.pos.push(Object.assign({id:uid()},n))},
     borrar:x?()=>{quitar(S.inv.pos,x.id);S.inv.ops=S.inv.ops.filter(o=>o.pos!==x.id)}:null})}
@@ -845,13 +845,19 @@ async function pdfLineas(buf){const pdfjs=await import('./pdf.min.js');pdfjs.Glo
   return L}
 async function leerPdfIng(buf){return filasIng(await pdfLineas(buf))}
 /* lector de operaciones de compra y venta */
+const r4=n=>Math.round(n*10000)/10000;
 const nNom=t=>String(t||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Z0-9]+/g,' ').trim();
 const GEN=['BANCO','GRUPO','INMOBILIARIA','INTERNACIONAL','INTERNATIONAL','HOLDING','HOLDINGS','ESPANA','ACCIONES','FONDO','CLASE','SOCIMI','PROPERTIES','ENERGIA','GLOBAL','WORLD','INDEX','MARKETS','EMERGING'];
 function parecido(a,b){a=nNom(a);b=nNom(b);if(!a||!b)return 0;if(a===b)return 99;const B=b.split(' ');let n=0;a.split(' ').forEach(t=>{if(t.length>=5&&!GEN.includes(t)&&B.includes(t))n++});if(!n&&a.length>=4&&b.length>=4&&(a.includes(b)||b.includes(a)))n=1;return n}
 const RE_CO=/^(compras?|suscripci[oó]n(es)?|adquisici[oó]n(es)?|buy|bought)$/i,RE_VE=/^(ventas?|reembolsos?|enajenaci[oó]n(es)?|sell|sold)$/i,RE_NUM=/^-?(\d{1,3}(\.\d{3})+|\d+)(,\d+)?$/,
   RE_PRE=/^(de|del|la|el|en|a|y)$/i,RE_RU=/^(valores?|acciones|eur|euros?|t[ií]tulos|participaciones|mercado|continuo|contado|operaci[oó]n|orden|ejecutada|bolsa|madrid|precio|importe|efectivo|comisi[oó]n|fecha|tipo|total|bruto|neto|l[ií]mite|[a-z]{2}[a-z0-9]{9}\d)$/i;
-function opsDeLineas(L){const out=[];let ctxN='',ctxF=null,mal=0;
-  L.forEach(raw=>{const fs=[];let l=String(raw).replace(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4}|\d{2})\b/g,(m,d,mo,y)=>{y=+y<100?2000+ +y:+y;if(+mo>=1&&+mo<=12&&+d>=1&&+d<=31){fs.push(y+'-'+pad(+mo)+'-'+pad(+d));return ' '}return m}).replace(/\b\d{1,2}:\d{2}(:\d{2})?\b/g,' ');
+const RE_INGOP=/^(\d{2})\/(\d{2})\/(\d{4})\s+(.+?)\s+([+-])\s?(\d{1,3}(?:\.\d{3})*|\d+)\s+(\d[\d.]*,\d+)\s*(?:EUR|€)\s+(\d[\d.]*,\d+)/i,RE_DER=/^[A-Z]{2,5}\.D[\s.]/i;
+function opsDeLineas(L){const out=[];let ctxN='',ctxF=null,mal=0,der=0;
+  L.forEach(raw=>{
+    /* certificado de operaciones de ING: fecha, valor, +títulos o -títulos, precio, importe con gastos */
+    const m=String(raw).trim().replace(/\s+/g,' ').match(RE_INGOP);
+    if(m){if(RE_DER.test(m[4])){der++;return}const q=pNum(m[6]),imp=pNum(m[8]),pr=pNum(m[7]);if(!(q>0))return;
+      out.push({f:m[3]+'-'+m[2]+'-'+m[1],t:m[5]==='+'?'c':'v',nombre:m[4].trim(),q,p:imp>0?r4(imp/q):pr,dud:false});return}const fs=[];let l=String(raw).replace(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4}|\d{2})\b/g,(m,d,mo,y)=>{y=+y<100?2000+ +y:+y;if(+mo>=1&&+mo<=12&&+d>=1&&+d<=31){fs.push(y+'-'+pad(+mo)+'-'+pad(+d));return ' '}return m}).replace(/\b\d{1,2}:\d{2}(:\d{2})?\b/g,' ');
     let co=false,ve=false;const nums=[],txt=[];
     l.split(/[\s|;]+/).forEach(k=>{if(!k)return;if(/%$/.test(k))return;const k0=k.replace(/(€|EUR)$/i,'').replace(/^[(:]+|[):,.]+$/g,'');if(!k0)return;
       if(RE_NUM.test(k0)){nums.push({t:k0,v:pNum(k0)});return}if(RE_CO.test(k0)){co=true;return}if(RE_VE.test(k0)){ve=true;return}if(/^compra\/venta$/i.test(k0)){co=ve=true;return}if(!RE_RU.test(k0)&&/[a-záéíóúñ]/i.test(k0))txt.push(k0)});
@@ -864,8 +870,7 @@ function opsDeLineas(L){const out=[];let ctxN='',ctxF=null,mal=0;
     else if(nums.length===2&&!nums[0].t.includes(',')&&nums[0].v>0&&nums[1].v>0){q=nums[0].v;pr=nums[1].v;dud=true}
     else{mal++;return}
     out.push({f:fs[0]||ctxF||null,t:co?'c':'v',nombre:nombre||ctxN||'Sin nombre',q,p:pr,dud})});
-  return {ops:out,mal}}
-const r4=n=>Math.round(n*10000)/10000;
+  return {ops:out,mal,der}}
 function opsCalc(L){L=L.map((o,i)=>({o,i})).sort((a,b)=>{const x=a.o.f||'',y=b.o.f||'';return x<y?-1:x>y?1:a.o.t===b.o.t?a.i-b.i:a.o.t==='c'?-1:1}).map(x=>x.o);let q=0,c=0,ult=null;
   L.forEach(o=>{ult=o.p;if(o.t==='c'){c=(q*c+o.q*o.p)/(q+o.q);q+=o.q}else{q-=o.q;if(q<=1e-9){q=0;c=0}}});return {q:r4(q),coste:c,n:L.length,ult}}
 const opsRes=pid=>opsCalc(S.inv.ops.filter(o=>o.pos===pid));
@@ -876,13 +881,15 @@ function proponerOps(res){const G={};res.ops.forEach(o=>{const k=nNom(o.nombre);
     const r=opsCalc(g.ops),nc=g.ops.filter(o=>o.t==='c').length,nv=g.ops.length-nc;val['g'+i]=best&&!emp?best.id:r.q>0?'nuevo':'no';
     return {k:'g'+i,l:esc(g.nombre)+' · '+nc+(nc===1?' compra':' compras')+(nv?', '+nv+(nv===1?' venta':' ventas'):''),tipo:'select',ops:[['nuevo','Añadir como producto nuevo'],['no','No usar']].concat(cand.map(p=>[p.id,p.nombre+' · '+p.cuenta])),ay:r.q>0?'Quedan '+FN.format(r.q)+' a '+eur(r.coste)+' de media.':'Según este PDF, vendido entero.'}});
   const mer=PROD.filter(x=>!esSaldo({tipo:x[0]}));
-  sheet({titulo:'Compras y ventas',intro:res.ops.length+(res.ops.length===1?' operación leída':' operaciones leídas')+' de '+gr.length+(gr.length===1?' valor':' valores')+'.'+(res.mal?' '+res.mal+' líneas con compra o venta no se han entendido y no se usan.':'')+(res.ops.some(o=>o.dud)?' En alguna no aparece el importe: revisa el resultado.':'')+' Comprueba a qué producto va cada valor.',val,txt:'Aplicar',
+  sheet({titulo:'Compras y ventas',intro:res.ops.length+(res.ops.length===1?' operación leída':' operaciones leídas')+' de '+gr.length+(gr.length===1?' valor':' valores')+'.'+(res.mal?' '+res.mal+' líneas con compra o venta no se han entendido y no se usan.':'')+(res.der?' '+res.der+' ventas de derechos de dividendo no se cuentan: no cambian tus títulos.':'')+' El precio de compra incluye comisiones.'+(res.ops.some(o=>o.dud)?' En alguna no aparece el importe: revisa el resultado.':'')+' Comprueba a qué producto va cada valor.',val,txt:'Aplicar',
     campos:campos.concat([{k:'cuenta',l:'Banco de los productos nuevos',tipo:'select',ops:S.inv.cuentas.map(c=>[c,c])},{k:'tipoN',l:'Tipo de los productos nuevos',tipo:'select',ops:mer}]),
-    guardar:v=>{let nu=0,ac=0,des=0;gr.forEach((g,i)=>{const d=v['g'+i];if(!d||d==='no')return;let p=d==='nuevo'?null:buscar(S.inv.pos,d),sigue=false;
+    guardar:v=>{let nu=0,ac=0,des=0,rep=0;gr.forEach((g,i)=>{const d=v['g'+i];if(!d||d==='no')return;let p=d==='nuevo'?null:buscar(S.inv.pos,d),sigue=false;
         if(p){const a=opsRes(p.id);sigue=a.n>0&&Math.abs(a.q-p.n)<1e-6}
         else{const r=opsCalc(g.ops);if(!(r.q>0))return;const tk=Object.keys(TICK).find(K=>parecido(K,g.nombre));p={id:uid(),cuenta:v.cuenta,tipo:v.tipoN,nombre:g.nombre,ticker:tk?TICK[tk]:'',n:r.q,coste:null,precio:r.ult,fp:ymd(new Date())};S.inv.pos.push(p);nu++;sigue=true}
-        addOps(p.id,g.ops);const r=opsRes(p.id);if(r.q>0&&r.coste>0)p.coste=r4(r.coste);if(sigue&&r.q>0)p.n=r.q;if(Math.abs(r.q-p.n)>1e-6)des++;ac++});
-      toast('Precio de compra puesto en '+ac+(ac===1?' producto':' productos')+(nu?'; '+nu+(nu===1?' nuevo':' nuevos'):'')+'.'+(des?' En '+des+' no cuadran los títulos: mira su ficha.':''))}})}
+        addOps(p.id,g.ops);const r=opsRes(p.id);if(sigue&&r.q>0)p.n=r.q;
+        /* más títulos que compras = acciones gratis (dividendo en acciones) o desdoblamiento: el dinero invertido se reparte entre todos */
+        if(r.q>0&&r.coste>0)p.coste=r4(p.n>r.q?r.coste*r.q/p.n:r.coste);if(p.n>r.q+1e-6)rep++;else if(Math.abs(r.q-p.n)>1e-6)des++;ac++});
+      toast('Precio de compra puesto en '+ac+(ac===1?' producto':' productos')+(nu?'; '+nu+(nu===1?' nuevo':' nuevos'):'')+'.'+(rep?' En '+rep+' tienes más títulos que compras (acciones gratis o desdoblamiento): el coste se reparte entre todos.':'')+(des?' En '+des+' hay menos títulos que compras: mira su ficha.':''))}})}
 function proponerIng(filas){const act=S.inv.pos.filter(p=>p.cuenta==='ING'&&p.tipo==='accion'),nom=p=>(p.ing||p.nombre).toUpperCase(),nuevos=filas.filter(f=>!act.some(p=>nom(p)===f.nombre)),fuera=act.filter(p=>!filas.some(f=>f.nombre===nom(p))),tot=filas.reduce((a,f)=>a+f.valor,0);
   sheet({titulo:'Cartera de ING',intro:filas.length+' valores por '+eur(tot)+'. Se actualizan '+(filas.length-nuevos.length)+' y se añaden '+nuevos.length+(fuera.length?'. Se quitan '+fuera.length+' acciones de ING que ya no están en el PDF: '+esc(fuera.map(p=>p.nombre).join(', ')):'')+'. Los precios de compra que hayas apuntado se conservan.',txt:'Cargar cartera',
     guardar:()=>{if(!S.inv.cuentas.includes('ING'))S.inv.cuentas.unshift('ING');S.inv.pos=S.inv.pos.filter(p=>!fuera.includes(p));S.inv.ops=S.inv.ops.filter(o=>!fuera.some(p=>p.id===o.pos));filas.forEach(f=>{const p=act.find(x=>nom(x)===f.nombre);if(p){p.n=f.n;p.precio=f.precio;p.fp=f.fecha}else S.inv.pos.push({id:uid(),cuenta:'ING',tipo:'accion',nombre:f.nombre,ing:f.nombre,ticker:TICK[f.nombre]||'',n:f.n,coste:null,precio:f.precio,fp:f.fecha})})}})}
