@@ -274,51 +274,13 @@ h3.sep{margin:18px 0 4px;padding-top:14px;border-top:1px solid var(--line)}
 .ad.si{background:rgba(48,164,108,.2)}.ad.si .st{background:var(--good);color:var(--card)}
 .ad.no{background:rgba(229,72,77,.15)}.ad.no .st{background:var(--crit);color:var(--card)}
 .ad.des .m{font-weight:500;color:var(--ink3)}
-/* juego de desbloqueo */
-#game{position:fixed;inset:0;z-index:85;display:none;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,#12353d 0%,#0a1c22 46%,#050d11 100%);color:#efe9d6;font-family:Georgia,"Times New Roman",serif;-webkit-user-select:none;user-select:none;touch-action:none;color-scheme:dark}
-#game.on{display:flex;flex-direction:column;align-items:center;justify-content:center}
-#game.out{animation:gOut .7s ease forwards;pointer-events:none}
-@keyframes gOut{to{opacity:0;transform:scale(1.05);visibility:hidden}}
-#game::before,#game::after{content:"";position:absolute;width:75vmax;height:75vmax;border-radius:50%;filter:blur(70px);pointer-events:none}
-#game::before{background:radial-gradient(circle,#2fa3a0 0%,transparent 66%);left:-30vmax;top:-34vmax;opacity:.38}
-#game::after{background:radial-gradient(circle,#c9a35b 0%,transparent 64%);right:-36vmax;bottom:-40vmax;opacity:.22}
-@media (prefers-reduced-motion:no-preference){#game::before{animation:gDrift 19s ease-in-out infinite alternate}#game::after{animation:gDrift 26s ease-in-out infinite alternate-reverse}}
-@keyframes gDrift{to{transform:translate(9vmax,7vmax) scale(1.18)}}
-.gz{--w:min(84vw,330px);--c:calc(var(--w)/6);position:relative;display:flex;flex-direction:column;align-items:center;gap:calc(var(--w)*.075);z-index:1;padding-bottom:calc(env(safe-area-inset-bottom) + 6px);user-select:none;-webkit-user-select:none}
-.gt{text-align:center}
-.gt b{display:block;font-weight:400;font-size:13px;letter-spacing:.7em;text-indent:.7em;color:#c9a35b;text-transform:uppercase}
-.gt i{display:block;margin-top:9px;font-size:15px;color:rgba(239,233,214,.55)}
-.gboard{position:relative;width:var(--w);height:var(--w);border-radius:calc(var(--c)*.2);background:linear-gradient(rgba(201,163,91,.07),rgba(201,163,91,.02));box-shadow:0 0 0 1px rgba(201,163,91,.55),0 0 0 7px rgba(201,163,91,.07),0 0 40px rgba(47,163,160,.14),inset 0 0 40px rgba(0,0,0,.35)}
-.gbg{position:absolute;inset:0;display:grid;grid-template:repeat(6,1fr)/repeat(6,1fr);pointer-events:none}
-.gbg i{box-shadow:inset 0 0 0 .5px rgba(201,163,91,.22);border-radius:calc(var(--c)*.1)}
-.gbg i:nth-child(odd){background:rgba(255,255,255,.012)}
-.gring{position:absolute;inset:-6%;border-radius:calc(var(--c)*.4);border:1.5px solid rgba(201,163,91,.9);opacity:0;pointer-events:none}
-.gtray{display:flex;flex-wrap:wrap;justify-content:center;gap:calc(var(--c)*.12) calc(var(--c)*.3);width:var(--w)}
-.gsl .gpc{--k:calc(var(--c)*.42)}
-.gsl{width:calc(var(--c)*1.75);height:calc(var(--c)*1.75);display:grid;place-items:center;border-radius:calc(var(--c)*.3);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
-.gpc{--k:var(--c);position:relative;width:calc(var(--pw)*var(--k));height:calc(var(--ph)*var(--k));cursor:grab;touch-action:none;transition:filter .2s}
-.gpc.b{position:absolute;left:calc(var(--x)*var(--k));top:calc(var(--y)*var(--k))}
-.gk{position:absolute;left:calc(var(--x)*var(--k) + 1px);top:calc(var(--y)*var(--k) + 1px);width:calc(var(--k) - 2px);height:calc(var(--k) - 2px);border-radius:calc(var(--k)*.24);
-  background:radial-gradient(circle at 30% 24%,hsla(var(--h),78%,70%,.62),hsla(var(--h),70%,40%,.12) 70%),linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.04) 55%,rgba(255,255,255,.1));
-  box-shadow:inset 0 0 0 1px hsla(var(--h),90%,82%,.42),inset 0 -5px 10px rgba(0,0,0,.28),0 5px 12px rgba(0,0,0,.35)}
-.gpc[data-k="I"]{--h:178}.gpc[data-k="O"]{--h:42}.gpc[data-k="L"]{--h:212}.gpc[data-k="T"]{--h:332}.gpc[data-k="S"]{--h:140}
-.gpc.ghost{opacity:.18}
-.gpc.prev{opacity:.4;pointer-events:none;filter:saturate(.6)}
-.gpc.nok{animation:gNo .3s}
-@keyframes gNo{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-.gpc.pop{animation:gPop .3s cubic-bezier(.2,1.5,.4,1)}
-@keyframes gPop{from{transform:scale(.8);opacity:.5}to{transform:none;opacity:1}}
-.gfly{position:fixed;z-index:200;pointer-events:none;margin:0;transform:scale(1.05);filter:drop-shadow(0 14px 18px rgba(0,0,0,.5))}
-#game.win .gboard .gpc{animation:gShine 1s ease both}
-@keyframes gShine{0%{filter:brightness(1)}40%{filter:brightness(1.7)}100%{filter:brightness(1)}}
-#game.win .gring{animation:gRipple 1.2s ease-out}
-@keyframes gRipple{0%{opacity:.9;transform:scale(.9)}100%{opacity:0;transform:scale(1.25)}}
+/* saludo que se mantiene pulsado para ver u ocultar las cifras */
+.hola{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
 .f .urg input:focus-visible+span{text-decoration:underline}
 </style>
 </head>
 <body>
 <div id="lock"><h2>Panel bloqueado</h2><input id="pinIn" type="password" inputmode="numeric" autocomplete="off" aria-label="PIN"><button class="btn pri" data-a="desbloquear">Entrar</button><div class="muted small" id="pinMsg"></div></div>
-<div id="game" role="dialog" aria-modal="true" aria-label="Coloca las piezas"></div>
 <div id="app"></div>
 <nav id="tabs" aria-label="Secciones"></nav>
 <div id="sheet" role="dialog" aria-modal="true"><div class="p" id="sheetP"></div></div>
@@ -695,7 +657,7 @@ function recSec(){const its=S.rec.items.slice().sort((a,b)=>'rav'.indexOf(a.urg)
   return s+'</div></section>'}
 V.inicio=()=>{const d=new Date(),h=hoy(),k=ymd(h),Y=ecoY(String(d.getFullYear())),m=d.getMonth();
   const evY=evDia(h,'yo'),evP=evDia(h,'pareja'),sesH=S.act.ses.filter(s=>s.fecha===k),dia=S.obj.items.filter(o=>o.ambito==='dia');
-  let s=cab(DIA[(d.getDay()+6)%7]+' '+d.getDate(),MES[m].toLowerCase()+' · hola, '+esc(S.cfg.nombre),'<button class="ib" data-a="ajustes" aria-label="Ajustes">'+ic('gear')+'</button>');
+  let s=cab(DIA[(d.getDay()+6)%7]+' '+d.getDate(),MES[m].toLowerCase()+' · <span class="hola" id="hola">Hola, '+esc(S.cfg.nombre)+'</span>','<button class="ib" data-a="ajustes" aria-label="Ajustes">'+ic('gear')+'</button>');
   // hoy
   s+='<section><div class="card"><h3>Hoy</h3><div style="margin-top:8px" class="carril">';
   if(!evY.length&&!evP.length)s+='<span class="muted">Sin eventos en la agenda.</span>';
@@ -847,10 +809,10 @@ function actCalSec(){const m0=U.actM,y=m0.getFullYear(),mo=m0.getMonth(),P=S.act
     g+='<button type="button" class="'+cl+'" data-a="diaAct" data-k="'+k+'" aria-label="'+DIA[dowI(d)]+' '+d.getDate()+(pl?', '+esc(pl.tipo):', sin actividad')+(hc===1?', completada':hc===0?', no completada':'')+'"><span class="n">'+d.getDate()+'</span><span class="m">'+(pl?esc(pl.tipo):'·')+'</span>'+(hc!=null?'<span class="st">'+ic(hc===1?'check':'x')+'</span>':'')+'</button>'}
   g+='</div>';
   return '<section><div class="sh"><h2>Calendario de actividad</h2><span style="display:flex;align-items:center;gap:2px"><button class="ib" data-a="actMes" data-n="-1" aria-label="Mes anterior">'+ic('left')+'</button><button class="ib" data-a="actMes" data-n="1" aria-label="Mes siguiente">'+ic('right')+'</button></span></div><div class="card">'+
-    '<div class="kv" style="padding-top:0"><b style="font-family:var(--round);font-size:18px">'+MES[mo]+' '+y+'</b><span style="display:flex;gap:14px">'+(esMes?'':'<button class="link" data-a="actMes" data-n="0">Este mes</button>')+'<button class="link" data-a="actRutina">Rutina semanal</button></span></div>'+g+
+    '<div class="kv" style="padding-top:0"><b style="font-family:var(--round);font-size:18px">'+MES[mo]+' '+y+'</b><span style="display:flex;gap:14px">'+(esMes?'':'<button class="link" data-a="actMes" data-n="0">Este mes</button>')+'<button class="link" data-a="actRutina">Rutina semanal</button><button class="link" data-a="actIcs">Importar .ics</button></span></div>'+g+
     '<div class="kv small" style="margin-top:8px"><span>'+nS+(nS===1?' completada':' completadas')+' · '+nN+(nN===1?' no completada':' no completadas')+(nP?' · '+nP+' por marcar':'')+'</span><b>'+(nT?nS+' de '+nT:'')+'</b></div>'+(nT?meter(nS/nT):'')+
     '<div class="ley"><span><i style="background:rgba(48,164,108,.55)"></i>Completada</span><span><i style="background:rgba(229,72,77,.5)"></i>No completada</span><span><i style="background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)"></i>Programada</span></div>'+
-    '<p class="muted small" style="margin:10px 0 0">'+(hayPlan()?'Toca un día para marcarlo o para cambiar su actividad.':'Pulsa «Rutina semanal» para decir qué te toca cada día. Después, toca un día para marcarlo o cambiarlo.')+'</p></div></section>'}
+    '<p class="muted small" style="margin:10px 0 0">'+(hayPlan()?'Toca un día para marcarlo o para cambiar su actividad. «Importar .ics» carga un calendario de entrenos como actividad prevista.':'Pulsa «Rutina semanal» para decir qué te toca cada día. Después, toca un día para marcarlo o cambiarlo.')+'</p></div></section>'}
 V.act=()=>{const l=lunes(hoy()),ss=sesSem(l),mins=ss.reduce((a,x)=>a+(x.min||0),0),rc=racha(),mk=perKey('mes');
   let s=cab('Actividad','Tus entrenos y tus metas','<button class="ib pri" data-a="sesNueva" aria-label="Añadir entreno">'+ic('plus')+'</button>');
   const G=S.act.metas;
@@ -996,6 +958,19 @@ function proponerIng(filas){const act=S.inv.pos.filter(p=>p.cuenta==='ING'&&p.ti
 function exportar(){const txt=JSON.stringify(S),nombre='panel-alex-'+ymd(new Date())+'.json';try{const f=new File([txt],nombre,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(()=>{});return}}catch(e){}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=nombre;document.body.appendChild(a);a.click();a.remove()}
 const h32=s=>{let h=2166136261;for(let k=0;k<2000;k++){for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}h^=k}return (h>>>0).toString(16)};
+/* importar un .ics como actividad prevista de cada día */
+const sinAc=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function tipoDeTitulo(t){const n=sinAc(t);const L=tiposAct().filter(x=>x!=='Otro').sort((a,b)=>b.length-a.length);const f=L.find(x=>n.includes(sinAc(x)));if(f)return f;
+  const SIN=[['run','Carrera'],['correr','Carrera'],['trail','Carrera'],['gym','Fuerza'],['pesas','Fuerza'],['strength','Fuerza'],['musculacion','Fuerza'],['box','Fitboxing'],['cycl','Bici'],['ciclis','Bici'],['bicic','Bici'],['swim','Natación'],['nado','Natación'],['walk','Caminata'],['paseo','Caminata'],['senderismo','Caminata']];
+  const s=SIN.find(x=>n.includes(x[0]));return s?s[1]:'Otro'}
+function icsAPlan(txt){if(!/BEGIN:VCALENDAR/.test(txt))throw new Error('El archivo no es un calendario');
+  const ev=parseICS(txt,addD(hoy(),-60),addD(hoy(),400)),D=S.act.plan.dias,vistos={};let n=0;
+  ev.slice().sort((a,b)=>a.d1<b.d1?-1:a.d1>b.d1?1:(a.h1||'')<(b.h1||'')?-1:1).forEach(e=>{
+    const min=e.h1&&e.h2&&e.h2!==e.h1?Math.max(0,(+e.h2.slice(0,2)*60+ +e.h2.slice(3))-(+e.h1.slice(0,2)*60+ +e.h1.slice(3))):null;
+    for(let d=pYmd(e.d1),fin=pYmd(e.d2);d<=fin;d=addD(d,1)){const k=ymd(d);
+      if(vistos[k]){const o=D[k];o.nota=(o.nota?o.nota+' · ':'')+e.titulo;continue}
+      const tp=tipoDeTitulo(e.titulo);D[k]={tipo:tp,min:min,nota:tp==='Otro'?e.titulo:''};vistos[k]=1;n++}});
+  return n}
 const A={
   tab:e=>{if(U.swipe&&Date.now()-U.swipe<600&&e.closest('.semw'))return;U.tab=e.dataset.t;if(U.tab==='agenda')U.sem=addD(lunes(hoy()),7*(+e.dataset.w||0));if(U.tab==='inicio')U.semI=0;render();window.scrollTo(0,0)},
   semI:e=>{const n=+e.dataset.n;if(n===(U.semI||0))return;U.semI=n;pintaSem(n?1:-1)},
@@ -1007,6 +982,7 @@ const A={
   diaRutina:e=>{delete S.act.plan.dias[e.dataset.k];cerrarHoja();cambio()},
   actMes:e=>{const n=+e.dataset.n,h=new Date();U.actM=n?new Date(U.actM.getFullYear(),U.actM.getMonth()+n,1):new Date(h.getFullYear(),h.getMonth(),1);render()},
   actRutina:()=>hojaRutina(),
+  actIcs:()=>elegirArchivo('.ics,text/calendar',t=>{try{const n=icsAPlan(t);cambio();toast(n?n+(n===1?' día cargado en el calendario de actividad':' días cargados en el calendario de actividad'):'No hay eventos en ese archivo para los próximos meses')}catch(er){toast(er.message)}}),
   sem:e=>{const n=+e.dataset.n;U.sem=n?addD(U.sem,7*n):lunes(hoy());render()},
   perro:e=>{const k=e.dataset.k,P=S.cal.perro=S.cal.perro||{};if(P[k])delete P[k];else P[k]=1;const lim=ymd(addD(hoy(),-90));Object.keys(P).forEach(x=>{if(x<lim)delete P[x]});cambio()},
   evNuevo:()=>hojaEv(),evEdit:e=>{const x=buscar(S.cal.ev,e.dataset.id);if(!x)return;if(x.origen!=='ics'){hojaEv(x);return}U.evSel=x;const d=pYmd(x.d1);
@@ -1088,61 +1064,25 @@ document.addEventListener('pointerover',e=>{const el=e.target.closest&&e.target.
 document.addEventListener('pointerdown',e=>{const el=e.target.closest&&e.target.closest('[data-tip]');if(el&&el.dataset.tip)verTip(el);else tip.style.display='none'});
 addEventListener('scroll',()=>tip.style.display='none',{passive:true});
 
-/* ================= juego de desbloqueo (tipo Tetris) =================
-   Tablero de 6x6 y cinco figuras (I, O, L, T, S). Un toque gira una figura; arrastrar la mueve.
-   Cuando las cinco están en el tablero, la app lo da por terminado.
-   Cualquier colocación válida entra en la app con las cifras borrosas.
-   Solo la colocación exacta guardada en GJ.H (figuras, giros y casillas) deja las cifras a la vista.
-   GJ.H es una huella, no la colocación en claro. */
-const GJ={H:'fb3679e5',K:['I','O','L','T','S'],N:6};
-const GSH={I:[[0,0],[0,1],[0,2],[0,3]],O:[[0,0],[0,1],[1,0],[1,1]],L:[[0,0],[1,0],[2,0],[2,1]],T:[[0,0],[0,1],[0,2],[1,1]],S:[[0,1],[0,2],[1,0],[1,1]]};
-const GM={p:[],drag:null,tm:null,done:false,nc:0,hid:0,prev:null};
-function gShape(k,rot){let c=GSH[k];for(let i=0;i<rot;i++)c=c.map(x=>[x[1],-x[0]]);const mr=Math.min(...c.map(x=>x[0])),mc=Math.min(...c.map(x=>x[1]));return c.map(x=>[x[0]-mr,x[1]-mc])}
-const gDim=(k,rot)=>{const s=gShape(k,rot);return {h:Math.max(...s.map(x=>x[0]))+1,w:Math.max(...s.map(x=>x[1]))+1}};
-function gCells(p,r,c,rot){return gShape(p.k,rot).map(x=>[x[0]+r,x[1]+c])}
-function gFits(p,r,c,rot){const N=GJ.N,mine=gCells(p,r,c,rot);if(mine.some(x=>x[0]<0||x[1]<0||x[0]>=N||x[1]>=N))return false;
-  const occ=new Set();GM.p.forEach(q=>{if(q!==p&&q.r!=null)gCells(q,q.r,q.c,q.rot).forEach(x=>occ.add(x[0]*N+x[1]))});return !mine.some(x=>occ.has(x[0]*N+x[1]))}
-function gFirma(ps){return GJ.K.map(k=>{const p=ps.find(q=>q.k===k);return k+':'+gCells(p,p.r,p.c,p.rot).map(x=>x[0]+','+x[1]).sort().join(';')}).join('|')}
-function gHtml(p,cls,st){const s=gShape(p.k,p.rot),d=gDim(p.k,p.rot);return '<div class="gpc'+(cls||'')+'" data-k="'+p.k+'" style="--pw:'+d.w+';--ph:'+d.h+';'+(st||'')+'">'+s.map(x=>'<i class="gk" style="--x:'+x[1]+';--y:'+x[0]+'"></i>').join('')+'</div>'}
-function gPaint(pop){$('#gboard').innerHTML='<div class="gbg">'+'<i></i>'.repeat(36)+'</div>'+GM.p.filter(p=>p.r!=null).map(p=>gHtml(p,' b'+(pop===p.k?' pop':''),'--x:'+p.c+';--y:'+p.r)).join('')+'<div class="gring"></div>';
-  $('#gtray').innerHTML=GM.p.map(p=>'<div class="gsl">'+(p.r==null?gHtml(p,pop===p.k?' pop':''):'')+'</div>').join('')}
-function gOpen(){const el=$('#game');U.priv=true;document.body.classList.add('priv');clearTimeout(GM.tm);GM.done=false;GM.drag=null;
-  GM.p=GJ.K.map(k=>({k,rot:Math.floor(Math.random()*4),r:null,c:null}));
-  for(let i=GM.p.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[GM.p[i],GM.p[j]]=[GM.p[j],GM.p[i]]}
-  el.className='';el.innerHTML='<div class="gz"><div class="gt"><b>Panel</b><i>Coloca las piezas</i></div><div class="gboard" id="gboard"></div><div class="gtray" id="gtray"></div></div>';
-  el.classList.add('on');gPaint()}
-function gProg(){clearTimeout(GM.tm);if(GM.p.every(p=>p.r!=null))GM.tm=setTimeout(gFin,1400)}
-function gFin(){if(GM.done||!GM.p.every(p=>p.r!=null))return;GM.done=true;h32ok=h32(gFirma(GM.p))===GJ.H;const el=$('#game');el.classList.add('win');
-  setTimeout(()=>{U.priv=!h32ok;el.classList.add('out');render();setTimeout(()=>{el.className='';el.innerHTML=''},760)},1250)}
-let h32ok=false;
-function gGira(p){const nr=(p.rot+1)%4;if(p.r==null){p.rot=nr;gPaint(p.k);return}
-  const cand=[];for(let dr=-3;dr<=3;dr++)for(let dc=-3;dc<=3;dc++)cand.push([dr,dc]);cand.sort((a,b)=>Math.abs(a[0])+Math.abs(a[1])-Math.abs(b[0])-Math.abs(b[1]));
-  for(const x of cand){if(gFits(p,p.r+x[0],p.c+x[1],nr)){p.rot=nr;p.r+=x[0];p.c+=x[1];gPaint(p.k);gProg();return}}
-  const e=$('#gboard .gpc[data-k="'+p.k+'"]');if(e){e.classList.remove('nok');void e.offsetWidth;e.classList.add('nok')}}
-document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('#game .gpc');if(!b||GM.done||GM.drag)return;const p=GM.p.find(q=>q.k===b.dataset.k);if(!p)return;clearTimeout(GM.tm);
-  GM.drag={p,x:e.clientX,y:e.clientY,moved:false,el:null,id:e.pointerId,r0:p.r,c0:p.c,cell:0};e.preventDefault()});
-window.addEventListener('pointermove',e=>{const d=GM.drag;if(!d||e.pointerId!==d.id)return;
-  if(!d.moved&&Math.hypot(e.clientX-d.x,e.clientY-d.y)>8){const b=$('#game .gpc[data-k="'+d.p.k+'"]');if(!b){GM.drag=null;return}d.moved=true;
-    const bd=$('#gboard').getBoundingClientRect();d.cell=bd.width/6;const c=document.createElement('div');c.innerHTML=gHtml(d.p,' gfly','--k:'+d.cell+'px');d.el=c.firstChild;$('#game').appendChild(d.el);b.classList.add('ghost')}
-  if(d.moved){const sd=gDim(d.p.k,d.p.rot),x0=e.clientX-sd.w*d.cell/2,y0=e.clientY-sd.h*d.cell/2;d.el.style.left=x0+'px';d.el.style.top=y0+'px';
-    const bd=$('#gboard').getBoundingClientRect(),c=Math.round((x0-bd.left)/d.cell),r=Math.round((y0-bd.top)/d.cell);
-    if(GM.prev){GM.prev.remove();GM.prev=null}if(gFits(d.p,r,c,d.p.rot)){const t=document.createElement('div');t.innerHTML=gHtml(d.p,' b prev','--x:'+c+';--y:'+r);GM.prev=t.firstChild;$('#gboard').appendChild(GM.prev)}}});
-function gSuelta(e,cancel){const d=GM.drag;if(!d||e.pointerId!==d.id)return;GM.drag=null;if(GM.prev){GM.prev.remove();GM.prev=null}
-  if(!d.moved){if(!cancel)gGira(d.p);gProg();return}
-  d.el.remove();const p=d.p,sd=gDim(p.k,p.rot),bd=$('#gboard').getBoundingClientRect(),x0=e.clientX-sd.w*d.cell/2,y0=e.clientY-sd.h*d.cell/2,c=Math.round((x0-bd.left)/d.cell),r=Math.round((y0-bd.top)/d.cell);
-  if(!cancel&&gFits(p,r,c,p.rot)){p.r=r;p.c=c;gPaint(p.k)}
-  else{const dentro=e.clientX>bd.left-d.cell&&e.clientX<bd.right+d.cell&&e.clientY>bd.top-d.cell&&e.clientY<bd.bottom+d.cell;if(cancel||(dentro&&d.r0!=null)){p.r=d.r0;p.c=d.c0}else{p.r=null;p.c=null}gPaint()}
-  gProg()}
-window.addEventListener('pointerup',e=>gSuelta(e,false));
-window.addEventListener('pointercancel',e=>gSuelta(e,true));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')GM.hid=Date.now();else if(GM.hid&&Date.now()-GM.hid>300000&&!$('#game').classList.contains('on'))gOpen()});
+/* ================= cifras ocultas =================
+   La app abre con las cifras borrosas. Mantener pulsado el saludo de Inicio (Hola, Álex)
+   durante un segundo las muestra o las vuelve a ocultar. Si la app pasa más de 5 minutos
+   en segundo plano, vuelven a ocultarse. El estado es U.priv (no se guarda ni se sincroniza). */
+const HOLD={t:null,x:0,y:0,id:null};
+function holaFin(){clearTimeout(HOLD.t);HOLD.t=null}
+document.addEventListener('pointerdown',e=>{const h=e.target.closest&&e.target.closest('#hola');if(!h)return;HOLD.x=e.clientX;HOLD.y=e.clientY;HOLD.id=e.pointerId;clearTimeout(HOLD.t);
+  HOLD.t=setTimeout(()=>{HOLD.t=null;U.priv=!U.priv;document.body.classList.toggle('priv',U.priv);if(navigator.vibrate)try{navigator.vibrate(12)}catch(x){}},1000)});
+window.addEventListener('pointermove',e=>{if(HOLD.t&&Math.hypot(e.clientX-HOLD.x,e.clientY-HOLD.y)>12)holaFin()});
+window.addEventListener('pointerup',holaFin);window.addEventListener('pointercancel',holaFin);
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('#hola'))e.preventDefault()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')HOLD.h=Date.now();else if(HOLD.h&&Date.now()-HOLD.h>300000){U.priv=true;render()}});
 
 /* ================= arranque ================= */
 if(S.cfg.pin)$('#lock').classList.add('on');
-snap();guardar(true);render();gOpen();SY.init();
+snap();guardar(true);render();SY.init();
 refrescaCal();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refrescaCal()});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
-window.__P={opsDeLineas,opsCalc,proponerOps,pdfLineas,resumen,metaVal,libresRe,SY,ingreso,filasIng,get S(){return S},ecoY,comun,miMes,medias,fijosMes,parseICS,twr,invTot,pNum,mesesHasta,racha,gTot,planDia,GM,GJ,gFirma,gFits,gShape,gCells};
+window.__P={opsDeLineas,opsCalc,proponerOps,pdfLineas,resumen,metaVal,libresRe,SY,ingreso,filasIng,get S(){return S},ecoY,comun,miMes,medias,fijosMes,parseICS,twr,invTot,pNum,mesesHasta,racha,gTot,planDia,icsAPlan,get U(){return U}};
 </script>
 </body>
 </html>

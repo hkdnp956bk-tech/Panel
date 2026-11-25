@@ -1,5 +1,5 @@
 // Panel Álex: guarda la app para que abra sin conexión.
-const CACHE = 'panel-alex-v13';
+const CACHE = 'panel-alex-v14';
 const ARCHIVOS = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
